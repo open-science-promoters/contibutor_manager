@@ -1,13 +1,18 @@
-# A contibutor manager:
+# like a reference managers, but for author lists:
 
 Using a software to manage scientific publications author list, the same way reference managers work.
 
 
-# this is an open source project, please join the team!
+# This is an open source project, please join the team!
 
 Team:
 - julien colomb, ideation and initiator, julien.colomb at fu-berlin.de
 - write your name here!
+
+
+# Idea
+
+Build a rshiny app to get author list via entering orcid and clicking through boxes.
 
 
 ## putative inputs
