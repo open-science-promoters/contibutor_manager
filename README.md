@@ -6,8 +6,8 @@ Using a software to manage scientific publications author list, the same way ref
 # this is an open source project, please join the team!
 
 Team:
-- julien colomb, ideation and initiator
-write your name here!
+- julien colomb, ideation and initiator, julien.colomb at fu-berlin.de
+- write your name here!
 
 
 ## putative inputs
