@@ -14,14 +14,30 @@ Team:
 
 Build a rshiny app to get author list via entering orcid and clicking through boxes.
 
+1. From scratch
+
+- GUI to get an author list:
+    - enter ORCID
+    - checkbox Credit
+    - choose output format: download button
+
+2. Import - converstion
+
+- import button: fill the GUI with the data uploaded
+- continue as for from scratch
+
 
 ## putative inputs
 
 orcid id: author's information
 ror: institutions information
+xml: previous created author list
 
 ## outputs
 
+The core format should probably be xml (converstion xxx -> xml -> yyy) ?
+
+other output formats:
 yml formated author list (for GIN, blog posts,..)
 JATSxml formatted author list (for substance, sourcedata)
 json formatted author list (zenodo,...)
