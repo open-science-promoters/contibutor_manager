@@ -36,6 +36,10 @@ xml: previous created author list
 ## outputs
 
 The core format should probably be xml (converstion xxx -> xml -> yyy) ?
+For publication system, they may not be able to use all information, but could pre-populate their forms using the data. (they often perform additional automatic checks during data import).
+
+To facilitate reimport, one could think about getting a zip file containing both the output desired and the core format output. The converstion would then not need to deal with import of other formats than the core.
+
 
 other output formats:
 yml formated author list (for GIN, blog posts,..)
@@ -45,6 +49,7 @@ text author list (other use)
 
 ## tools and communities to approach
 
+OJS / pkp: Juan Pablo Alperin
 jats4r
 rorcid (orcid API)
 force11
