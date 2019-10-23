@@ -7,7 +7,7 @@ Using a software to manage scientific publications author list, the same way ref
 
 Team:
 - julien colomb, ideation and initiator, julien.colomb at fu-berlin.de
-- write your name here!
+- Nicole Vasilevsky, vasilevs at ohsu.edu
 
 
 # Idea
