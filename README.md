@@ -19,6 +19,7 @@ Build a rshiny app to get author list via entering orcid and clicking through bo
 - GUI to get an author list:
     - enter ORCID
     - checkbox Credit
+    - **choose affiliation**
     - choose output format: download button
 
 2. Import - converstion
@@ -29,9 +30,9 @@ Build a rshiny app to get author list via entering orcid and clicking through bo
 
 ## putative inputs
 
-orcid id: author's information
-ror: institutions information
-xml: previous created author list
+- orcid id: author's information
+- ror: institutions information
+- xml: previous created author list
 
 ## outputs
 
@@ -49,8 +50,26 @@ text author list (other use)
 
 ## tools and communities to approach
 
-OJS / pkp: Juan Pablo Alperin
-jats4r
-rorcid (orcid API)
-force11
+- OJS / pkp: Juan Pablo Alperin
+- jats4r
+- rorcid (orcid API)
+- force11
 ...
+
+## author information
+
+- givenName
+- familyName
+- middle name
+- orcid number
+- affiliation(s), including postal address
+- email address
+
+## Dependencies
+
+All authors need an orcid, with:
+ - public email address in their orcid
+ - full name information
+ - full affiliation to be used for the author list, postal address should be indicated in the department field.
+ 
+ The software does not allow to enter information manually.
