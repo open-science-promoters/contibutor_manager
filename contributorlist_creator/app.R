@@ -21,9 +21,10 @@ ui <- fluidPage(
     # Application title
     titlePanel("Author manager"),
     tags$h6('Distributed under MIT license,'), tags$a(href="https://github.com/open-science-promoters/contibutor_manager/issues", "Report issues here"),
+    tags$a(href="https://casrai.org/credit/", "More information about the contribution roles here!")
     tags$h2("Create or port an author list in a specific format"),
 
-    # Sidebar with a slider input for number of bins 
+    # fluidrow 
     fluidRow(
         column (4,
             textInput(inputId = "orcid.id",
@@ -43,8 +44,14 @@ ui <- fluidPage(
         ),
         column (4,
                 
-                actionButton("addauthor", "Add or modify information about the author"),
+
                 textOutput("theauthorinfo")
+        )
+    ),fluidRow(
+        column (4,
+                
+                actionButton("addauthor", "Add (or modify) information about the author"),
+                
         )
     )
 )
@@ -73,7 +80,7 @@ server <- function(input, output, session) {
                              choiceNames = NULL, choiceValues = NULL)
     
     output$theauthorinfo <- renderText({
-        c(input$creditinfo)
+        c(input$creditinfo, "-----",input$affiliation)
     })
     
     observeEvent (input$addauthor,{
