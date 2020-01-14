@@ -10,6 +10,7 @@
 library(shiny)
 library (rorcid)
 library (readr)
+source("dependencies/functions.r", local=TRUE)
 
 creditlist <- read_delim("../creditroles.csv","\t", escape_double = FALSE, trim_ws = TRUE)
 
@@ -27,7 +28,9 @@ ui <- fluidPage(
         column (4,
             textInput(inputId = "orcid.id",
                       label = "enter an ORCID ID (16 digits with 3 dashes):",
-                      value='0000-0001-6339-0374')
+                      value='0000-0001-6339-0374'),
+            checkboxGroupInput("affiliation", label="multiple choice possible:",
+                               choices = "set orcid first")
         ),
 
         # Show a plot of the generated distribution
@@ -35,19 +38,49 @@ ui <- fluidPage(
                 
                 "Indicate contribution for:",
                 tags$b(textOutput("Namefromid")),
-                checkboxGroupInput("variable", "multiple choice possible:",
+                checkboxGroupInput("creditinfo", "multiple choice possible:",
                                    creditlist$Term)    
+        ),
+        column (4,
+                
+                actionButton("addauthor", "Add or modify information about the author"),
+                textOutput("theauthorinfo")
         )
     )
 )
 
 # Define server logic required to draw a histogram
-server <- function(input, output) {
+server <- function(input, output, session) {
 
     output$Namefromid <- renderText({
         x=rorcid::orcid_id(input$orcid.id)
         return (paste(x[[1]]$`name`$`given-names`$value,
                       x[[1]]$`name`$`family-name`$value))
+    })
+    
+
+    
+    observe({
+        x <- input$orcid.id
+
+        updateCheckboxGroupInput(session, "affiliation",
+                                 label = "choose affiliations",
+                                 choices = affiliationfromorcid(x),
+        )
+    })
+    updateCheckboxGroupInput(session, affiliation, label = NULL,
+                             choices = NULL, selected = NULL, inline = FALSE,
+                             choiceNames = NULL, choiceValues = NULL)
+    
+    output$theauthorinfo <- renderText({
+        c(input$creditinfo)
+    })
+    
+    observeEvent (input$addauthor,{
+        output$theauthorinfo <- renderText({
+            paste("TEST2",input$addauthor)
+        })
+        
     })
 }
 
