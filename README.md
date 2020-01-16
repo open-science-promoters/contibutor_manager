@@ -48,6 +48,26 @@ JATSxml formatted author list (for substance, sourcedata)
 json formatted author list (zenodo,...)
 text author list (other use)
 
+To implement:
+
+``` 
+manubot yaml
+------------
+
+github: dhimmel  # strongly suggested
+name: Daniel S. Himmelstein  # mandatory
+initials: DSH  # optional
+orcid: 0000-0002-3012-7446  # mandatory
+twitter: dhimmel  # optional
+email: daniel.himmelstein@gmail.com  # suggested
+affiliations:  # as a list, strongly suggested
+  - Department of Systems Pharmacology and Translational Therapeutics, University of Pennsylvania
+  - Department of Biological & Medical Informatics, University of California, San Francisco
+funders: GBMF4552  # optional
+roles:  # optional, as a list
+      - CREDIT_00000013 writing original draft role
+```
+
 ## tools and communities to approach
 
 - OJS / pkp: Juan Pablo Alperin
