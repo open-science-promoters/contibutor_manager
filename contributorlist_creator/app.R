@@ -21,7 +21,8 @@ ui <- fluidPage(
     # Application title
     titlePanel("Author manager"),
     tags$h6('Distributed under MIT license,'), tags$a(href="https://github.com/open-science-promoters/contibutor_manager/issues", "Report issues here"),
-    tags$a(href="https://casrai.org/credit/", "More information about the contribution roles here!")
+    tags$br() ,
+    tags$a(href="https://casrai.org/credit/", "More information about the contribution roles here!"),
     tags$h2("Create or port an author list in a specific format"),
 
     # fluidrow 
