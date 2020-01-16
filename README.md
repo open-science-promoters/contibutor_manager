@@ -16,11 +16,15 @@ Build a rshiny app to get author list via entering orcid and clicking through bo
 
 1. From scratch
 
-- GUI to get an author list:
+- GUI to get an author:
     - enter ORCID
     - checkbox Credit
+    - box for is_an_author and is_corresponding_author, default is yes/no
     - **choose affiliation**
-    - choose output format: download button
+    - add author to list.
+- on the list:
+        - click one author to modify information (enter data on above choice boxes)
+        - choose output format: download button
 
 2. Import - converstion
 
@@ -48,7 +52,7 @@ JATSxml formatted author list (for substance, sourcedata)
 json formatted author list (zenodo,...)
 text author list (other use)
 
-To implement:
+output to implement:
 
 ``` 
 manubot yaml
