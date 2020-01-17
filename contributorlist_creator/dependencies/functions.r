@@ -8,7 +8,7 @@ affiliationfromorcid <- function(ORCID) {
   y= testconn$`affiliation-group`$summaries
   if (class (y) != "list") return (c("no affiliation entered at this number, please update the orcid record.")) # what if orcid has no affiliation ?
   
-  affiliationl = c()
+  affiliationl = list()
   for ( j in c(1: length(y))){
     affiliationl[[j]]= paste0(
       y[[j]]$`employment-summary.organization.name`,
@@ -19,9 +19,34 @@ affiliationfromorcid <- function(ORCID) {
   return (affiliationl)
 }
 
+# function returning funding from orcid number (as a list)
 #affiliationfromorcid("0000-0001-9799-2656")
 ORCID= "0000-0001-9799-2656"
 
+fundingfromorcid <- function(ORCID) {
+  
+  testconn = try(orcid_fundings (ORCID)[[1]])
+  if (class (testconn) != "list") return (c("orcid connection not working")) # what if orcid has no affiliation ?
+  
+  y= testconn$group$`funding-summary`
+  if (class (y) != "list") return (c("no funding entered at this number, please update the orcid record.")) # what if orcid has no affiliation ?
+  
+  fundingl = list()
+  for ( j in c(1: length(y))){
+    fundingl[[j]]= paste0( "funded by the ",
+                           y[[j]]$organization.name,
+                           ", ",
+                           y[[j]]$`external-ids.external-id`[[1]]$`external-id-type`,
+                           " ",
+                           y[[j]]$`external-ids.external-id`[[1]]$`external-id-value`,
+                           ": ",
+                           y[[j]]$title.title.value
+    )
+  }
+  return (fundingl)
+}
+
+# fundingfromorcid(ORCID)
 
 ##' Convert List to XML
 ##'
@@ -67,4 +92,6 @@ listToXml <- function(item, tag) {
   }
   return(xml)
 }
+
+listToXml(item= X$info, tag= "contrib-group")
 
