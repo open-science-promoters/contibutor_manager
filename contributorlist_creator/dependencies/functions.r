@@ -81,9 +81,8 @@ listToXml <- function(item, tag) {
     for(i in 1:length(item)) {
       if (length (item[[i]]) == 0) {}
       else if (names(item)[i] != ".attrs") {
-        print(i)
+        #print(i)
         if (is.null (names(item[[i]][1])) ){
-          print(i)
           for (j in c(1:length (item[[i]]))){
             child <- xmlNode(names(item)[i])
             xmlValue(child) <- item[[i]][j]
@@ -105,5 +104,5 @@ listToXml <- function(item, tag) {
   return(xml)
 }
 
-#listToXml(item= X$info, tag= "contrib-group")
+#listToXml(item= X, tag= "contrib-group")
 
