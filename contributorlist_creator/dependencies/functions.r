@@ -56,7 +56,7 @@ fundingfromorcid <- function(ORCID) {
 ##' @param tag xml tag
 ##' @return xmlNode
 ##' @export
-##' @author David LeBauer, Carl Davidson, Rob Kooper
+##' @author David LeBauer, Carl Davidson, Rob Kooper, julien colomb
 listToXml <- function(item, tag) {
   # just a textnode, or empty node with attributes
   if(typeof(item) != 'list') {
@@ -79,8 +79,20 @@ listToXml <- function(item, tag) {
     # node with child nodes
     xml <- xmlNode(tag)
     for(i in 1:length(item)) {
-      if (names(item)[i] != ".attrs") {
-        xml <- append.xmlNode(xml, listToXml(item[[i]], names(item)[i]))
+      if (length (item[[i]]) == 0) {}
+      else if (names(item)[i] != ".attrs") {
+        print(i)
+        if (is.null (names(item[[i]][1])) ){
+          print(i)
+          for (j in c(1:length (item[[i]]))){
+            child <- xmlNode(names(item)[i])
+            xmlValue(child) <- item[[i]][j]
+            xml <- append.xmlNode(xml,child)
+          }
+        } else {
+          xml <- append.xmlNode(xml, listToXml(item[[i]], names(item)[i]))
+        }
+        
       }
     }    
   }
@@ -93,5 +105,5 @@ listToXml <- function(item, tag) {
   return(xml)
 }
 
-listToXml(item= X$info, tag= "contrib-group")
+#listToXml(item= X$info, tag= "contrib-group")
 
