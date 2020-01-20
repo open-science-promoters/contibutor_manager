@@ -1,3 +1,4 @@
+---
 name:
   given-names: Julien
   surname: Colomb
@@ -21,3 +22,4 @@ funders:
 .attrs:
   contrib-type: author
   corresponding-author: no
+---  
