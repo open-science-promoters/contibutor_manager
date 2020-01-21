@@ -10,6 +10,8 @@
 library(shiny)
 library (rorcid)
 library (readr)
+library(yaml)
+
 source("dependencies/functions.r", local=TRUE)
 
 creditlist <- read_delim("../creditroles.csv","\t", escape_double = FALSE, trim_ws = TRUE)
@@ -32,6 +34,8 @@ ui <- fluidPage(
                       label = "enter an ORCID ID (16 digits with 3 dashes):",
                       value='0000-0001-6339-0374'),
             checkboxGroupInput("affiliation", label="multiple choice possible:",
+                               choices = "set orcid first"),
+            checkboxGroupInput("funding", label="multiple choice possible:",
                                choices = "set orcid first")
         ),
 
@@ -46,12 +50,13 @@ ui <- fluidPage(
         column (4,
                 
 
-                textOutput("theauthorinfo")
+                verbatimTextOutput("theauthorinfo")
         )
     ),fluidRow(
-        column (4,
+        column (12,
                 
                 actionButton("addauthor", "Add (or modify) information about the author"),
+                verbatimTextOutput("theauthorinfo_tot")
                 
         )
     )
@@ -59,6 +64,8 @@ ui <- fluidPage(
 
 # Define server logic 
 server <- function(input, output, session) {
+    
+    RVAL= reactiveValues()
 
     output$Namefromid <- renderText({
         x=rorcid::orcid_id(input$orcid.id)
@@ -75,17 +82,33 @@ server <- function(input, output, session) {
                                  label = "choose affiliations",
                                  choices = affiliationfromorcid(x),
         )
-    })
-    updateCheckboxGroupInput(session, affiliation, label = NULL,
-                             choices = NULL, selected = NULL, inline = FALSE,
-                             choiceNames = NULL, choiceValues = NULL)
+        
+        
+        updateCheckboxGroupInput(session, "funding",
+                                 label = "choose funding",
+                                 choices = fundingfromorcid(x),
+                                 
+        )
+        
+    })    
+    
+    
+    authorinfo <- reactive({
+         createauthorinfo (ORCID=input$orcid.id, 
+                                            credit = input$creditinfo, 
+                                            affiliationl = input$affiliation,
+                                            is_corresponding_author = FALSE,
+                                            `contrib-type` = "author",
+                                            funding = input$funding)
+        
+    })    
     
     output$theauthorinfo <- renderText({
-        c(input$creditinfo, "-----",input$affiliation)
-    })
+        as.yaml(authorinfo(), indent.mapping.sequence=TRUE)
+        }) 
     
     observeEvent (input$addauthor,{
-        output$theauthorinfo <- renderText({
+        output$theauthorinfo_tot <- renderText({
             paste("TEST2",input$addauthor)
         })
         
