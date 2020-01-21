@@ -35,10 +35,12 @@ X=list(
 )
 
 
-
+##XML
 a=listToXml(item= X, tag= "contrib-group")
 
 ### appending several authors
+
+## working on reimport:
 
 b= xmlToList(listToXml(item= X, tag= "contrib-group"))
 d=tapply(unlist(b, use.names = TRUE, recursive=FALSE), rep(names(b), lengths(b)), FUN = c)
@@ -64,4 +66,13 @@ list2 =list ("credit" = "Conceptualization","credit" ="Software", ".attrs" = lis
 
 d=tapply(unlist(list2, use.names = FALSE, recursive=FALSE), rep(names(list2), lengths(list2)), FUN = list)
 
+
+
+## yaml
+
+metadata=print(yaml::as.yaml(X))
+yaml::write_yaml(X, file ="yamlexample.md")
+b=yaml::read_yaml("temp.md")
+
+write_lines(a)
 

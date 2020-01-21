@@ -2,7 +2,7 @@
 # function returning affiliations from orcid number (as a list)
 affiliationfromorcid <- function(ORCID) {
   
-  testconn = try(orcid_employments (ORCID)[[1]])
+  testconn = try(rorcid::orcid_employments (ORCID)[[1]])
   if (class (testconn) != "list") return (c("orcid connection not working")) # what if orcid has no affiliation ?
   
   y= testconn$`affiliation-group`$summaries
@@ -25,7 +25,7 @@ ORCID= "0000-0001-9799-2656"
 
 fundingfromorcid <- function(ORCID) {
   
-  testconn = try(orcid_fundings (ORCID)[[1]])
+  testconn = try(rorcid::orcid_fundings (ORCID)[[1]])
   if (class (testconn) != "list") return (c("orcid connection not working")) # what if orcid has no affiliation ?
   
   y= testconn$group$`funding-summary`
@@ -47,6 +47,53 @@ fundingfromorcid <- function(ORCID) {
 }
 
 # fundingfromorcid(ORCID)
+
+createauthorinfo <- function(ORCID="0000-0002-3127-5520", 
+                             credit = list("Writing – review & editing"), 
+                             affiliationl = NULL,
+                             is_corresponding_author = FALSE,
+                             `contrib-type` = "author",
+                             funding = NULL) {
+  # test orcid connection
+  testconn = try(rorcid::orcid_id(ORCID)[[1]])
+  if (class (testconn) != "list") return (c("orcid connection not working")) # what if orcid has no affiliation ?
+  
+  #y= testconn$group$`funding-summary`
+  #if (class (y) != "list") return (c("no funding entered at this number, please update the orcid record.")) # what if orcid has no affiliation ?
+  
+  # get orcid info
+  x= rorcid::orcid_id(ORCID)[[1]]
+  urls=x$`researcher-url`$`researcher-url`$url.value
+  
+  #set defaults
+  if (is.null(affiliationl)) affiliationl = affiliationfromorcid(ORCID)[1]
+  if (is.null(funding))  funding = fundingfromorcid(ORCID)[1]
+
+  
+  
+  
+  X=list(
+    
+    "name" = list(
+      "given-names" = paste0(x$name$`given-names`),
+      "surname" = paste0(x$name$`family-name`)
+    )
+    ,"contrib-id" = ORCID
+    ,"github-handle" = urls [grep("github",x$`researcher-url`$`researcher-url`$url.value)]
+    ,"twitter-handle"= urls [grep("twitter",x$`researcher-url`$`researcher-url`$url.value)]
+    ,"author-notes" = list( "email" =x$emails$email$email[1])
+    ,"affiliation" = affiliationl
+    ,"role" = credit
+    ,"funders" = funding
+    
+    ,".attrs" = list(
+      "contrib-type"= `contrib-type`,
+      "corresponding-author" = is_corresponding_author)
+  )
+  return (X)
+}
+
+
 
 ##' Convert List to XML
 ##'
@@ -105,4 +152,30 @@ listToXml <- function(item, tag) {
 }
 
 #listToXml(item= X, tag= "contrib-group")
+
+#redefining write_yaml:
+`write_yaml` <-
+  function(x, file, fileEncoding = "UTF-8", delimiter = FALSE,...) {
+    result <- as.yaml(x, ...)
+    
+    if (is.character(file)) {
+      file <-
+        if (nzchar(fileEncoding)) {
+          file(file, "w", encoding = fileEncoding)
+        } else {
+          file(file, "w")
+        }
+      on.exit(close(file))
+    }
+    else if (!isOpen(file, "w")) {
+      open(file, "w")
+      on.exit(close(file))
+    }
+    if (!inherits(file, "connection")) {
+      stop("'file' must be a character string or connection")
+    }
+    if (delimiter) cat ("---", file=file, sep="\n")
+    cat(result, file=file, sep="")
+    if (delimiter) cat ("---", file=file, sep="\n")
+  }
 
