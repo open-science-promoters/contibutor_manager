@@ -4,35 +4,32 @@
 # credit = c(input$creditinfo)
 # affiliation = c(input$affiliation)
 
-ORCID="0000-0002-3127-5520"
-x= rorcid::orcid_id(ORCID)[[1]]
-credit = list("Conceptualization", "Software")
-affiliationl = affiliationfromorcid(ORCID)[1:2]
-is_corresponding_author = FALSE
-`contrib-type` = "author"
-funding = fundingfromorcid(ORCID)[1:2]
-urls=x$`researcher-url`$`researcher-url`$url.value
+autorinfo = list()
+ORCIDnum = "0000-0002-3127-5520"
+autorinfo [[ORCIDnum]] = createauthorinfo (ORCID = ORCIDnum)
+ORCIDnum = "0000-0001-9799-2656"
+autorinfo [[ORCIDnum]] = createauthorinfo (ORCID = ORCIDnum)
+autorinfo [[ORCIDnum]] = createauthorinfo (ORCID = ORCIDnum, credit = list("ahahah"))
 
+library(yaml)
+#metadata=print(yaml::as.yaml(autorinfo))
+write_yaml(autorinfo, file ="yamlexample2.md", delimiter=TRUE, indent.mapping.sequence=TRUE)
+b=yaml::read_yaml("yamlexample2.md")
 
+filename = "yamlexample3.md"
+file <- file(filename, "w")
+cat ("---", file = file, sep = "\n")
+cat ("author:", file = file, sep = "\n")
+for (i in c(1: length(autorinfo))){
+  #print (i)
+  cat (as.yaml(autorinfo[[i]]), file = file, sep = "\n")
+}
+close (file)
 
-X=list(
-
-  "name" = list(
-    "given-names" = paste0(x$name$`given-names`),
-    "surname" = paste0(x$name$`family-name`)
-  )
-  ,"contrib-id" = ORCID
-  ,"github-handle" = urls [grep("github",x$`researcher-url`$`researcher-url`$url.value)]
-  ,"twitter-handle"= urls [grep("twitter",x$`researcher-url`$`researcher-url`$url.value)]
-  ,"author-notes" = list( "email" =x$emails$email$email[1])
-  ,"affiliation" = affiliationl
-  ,"role" = credit
-  ,"funders" = funding
-  
-,".attrs" = list(
-  "contrib-type"= `contrib-type`,
-  "corresponding-author" = is_corresponding_author)
-)
+exportautor =autorinfo
+names(exportautor) = NULL
+names(exportautor)[1] = "author"
+write_yaml(exportautor, file ="yamlexample3.md", delimiter=TRUE, indent.mapping.sequence=TRUE)
 
 
 ##XML
@@ -71,8 +68,8 @@ d=tapply(unlist(list2, use.names = FALSE, recursive=FALSE), rep(names(list2), le
 ## yaml
 
 metadata=print(yaml::as.yaml(X))
-yaml::write_yaml(X, file ="yamlexample.md")
-b=yaml::read_yaml("temp.md")
+yaml::write_yaml(X, file ="yamlexample2.md")
+b=yaml::read_yaml("yamlexample2.md")
 
 write_lines(a)
 

@@ -1,3 +1,5 @@
+x <- "07073399-4dcc-47b3-a0a8-925327224519"
+Sys.setenv(ORCID_TOKEN=x)
 
 # function returning affiliations from orcid number (as a list)
 affiliationfromorcid <- function(ORCID) {

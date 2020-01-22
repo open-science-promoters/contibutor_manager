@@ -14,7 +14,7 @@ library(yaml)
 
 source("dependencies/functions.r", local=TRUE)
 
-creditlist <- read_delim("../creditroles.csv","\t", escape_double = FALSE, trim_ws = TRUE)
+creditlist <- read_delim("dependencies/creditroles.csv","\t", escape_double = FALSE, trim_ws = TRUE)
 
 
 # Define UI for application that draws a histogram
@@ -33,8 +33,12 @@ ui <- fluidPage(
             textInput(inputId = "orcid.id",
                       label = "enter an ORCID ID (16 digits with 3 dashes):",
                       value='0000-0001-6339-0374'),
+            radioButtons ("corresp_author", "Is corresponding author ?", c("yes" = TRUE, "no" = FALSE)
+            ),
             checkboxGroupInput("affiliation", label="multiple choice possible:",
                                choices = "set orcid first"),
+            
+        
             checkboxGroupInput("funding", label="multiple choice possible:",
                                choices = "set orcid first")
         ),
@@ -44,8 +48,10 @@ ui <- fluidPage(
                 
                 "Indicate contribution for:",
                 tags$b(textOutput("Namefromid")),
+                radioButtons("contribution_type", "specify if not author:",
+                                   choices = c("author", "research assistant", "editor"), selected = "author"),
                 checkboxGroupInput("creditinfo", "multiple choice possible:",
-                                   creditlist$Term)    
+                                   creditlist$Term, selected = "Writing – review & editing")    
         ),
         column (4,
                 
@@ -97,8 +103,8 @@ server <- function(input, output, session) {
          createauthorinfo (ORCID=input$orcid.id, 
                                             credit = input$creditinfo, 
                                             affiliationl = input$affiliation,
-                                            is_corresponding_author = FALSE,
-                                            `contrib-type` = "author",
+                                            is_corresponding_author = input$corresp_author,
+                                            `contrib-type` = input$contribution_type,
                                             funding = input$funding)
         
     })    
