@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/211304521.svg)](https://zenodo.org/badge/latestdoi/211304521)
+
 # foreword and contribution
 
 Dear reader, this repository is still in construction: while I have not build any contribution guide, feel free to join this journey, give feedback via issues or directly participate in the development via pull requests. If the project grows, I will make sure contributions will become easier. The initial idea was to make use of contribution role easier, but it could become more than that.
