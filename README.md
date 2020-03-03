@@ -1,18 +1,29 @@
-# like a reference managers, but for author lists:
+[![DOI](https://zenodo.org/badge/211304521.svg)](https://zenodo.org/badge/latestdoi/211304521)
 
-Using a software to manage scientific publications author list, the same way reference managers work.
+# foreword and contribution
 
+Dear reader, this repository is still in construction: while I have not build any contribution guide, feel free to join this journey, give feedback via issues or directly participate in the development via pull requests. If the project grows, I will make sure contributions will become easier. The initial idea was to make use of contribution role easier, but it could become more than that.
 
-# This is an open source project, please join the team!
+## This is an open source project, please join the team!
 
 Team:
 - julien colomb, ideation and initiator, julien.colomb at fu-berlin.de
 - Nicole Vasilevsky, vasilevs at ohsu.edu
 
 
+
+
+# like a reference managers, but for author lists:
+
+ultimate goal: using a software to manage scientific publications author list, the same way reference managers work.
+next step: create author lists from orcid numbers
+
+
 # Step one: the contributor list creator
 
-## idea
+
+## The app
+
 
 Build a rshiny app to get author list via entering orcid and clicking through boxes.
 
@@ -54,7 +65,7 @@ JATSxml formatted author list (for substance, sourcedata)
 json formatted author list (zenodo,...)
 text author list (other use)
 
-output to implement:
+example output to implement:
 
 ``` 
 manubot yaml
