@@ -10,7 +10,9 @@ Team:
 - Nicole Vasilevsky, vasilevs at ohsu.edu
 
 
-# Idea
+# Step one: the contributor list creator
+
+## idea
 
 Build a rshiny app to get author list via entering orcid and clicking through boxes.
 
@@ -71,8 +73,14 @@ funders: GBMF4552  # optional
 roles:  # optional, as a list
       - CREDIT_00000013 writing original draft role
 ```
+# Step two: contributor manager
 
-## tools and communities to approach
+- Information about co-authors should be saved
+- Drag and drop way to create author lists
+- Information (author name + affiliation) should be imported from papers metadata (from orcid? via crossref?)
+
+
+## Tools and communities to approach
 
 - OJS / pkp: Juan Pablo Alperin
 - jats4r
@@ -80,7 +88,7 @@ roles:  # optional, as a list
 - force11
 ...
 
-## author information
+## Author information
 
 - givenName
 - familyName

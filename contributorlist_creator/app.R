@@ -71,7 +71,7 @@ ui <- fluidPage(
 # Define server logic 
 server <- function(input, output, session) {
     
-    RVAL= reactiveValues()
+    RVAL= reactiveValues(authorlist = list())
 
     output$Namefromid <- renderText({
         x=rorcid::orcid_id(input$orcid.id)
@@ -87,13 +87,27 @@ server <- function(input, output, session) {
         updateCheckboxGroupInput(session, "affiliation",
                                  label = "choose affiliations",
                                  choices = affiliationfromorcid(x),
+                                 selected = RVAL$authorlist[[input$orcid.id]]$affiliation,
         )
         
         
         updateCheckboxGroupInput(session, "funding",
                                  label = "choose funding",
                                  choices = fundingfromorcid(x),
+                                 selected = RVAL$authorlist[[input$orcid.id]]$funders,
                                  
+        )
+        
+        updateCheckboxGroupInput(session, "creditinfo",
+                                 selected = RVAL$authorlist[[input$orcid.id]]$role,
+        )
+        
+        updateRadioButtons(session, "contribution_type",
+                                 selected = RVAL$authorlist[[input$orcid.id]]$.attrs$`contrib-type`,
+        )
+        
+        updateRadioButtons(session, "corresp_author",
+                           selected = RVAL$authorlist[[input$orcid.id]]$.attrs$`corresponding-author`,
         )
         
     })    
@@ -113,9 +127,14 @@ server <- function(input, output, session) {
         as.yaml(authorinfo(), indent.mapping.sequence=TRUE)
         }) 
     
+    
     observeEvent (input$addauthor,{
+        RVAL$authorlist[[input$orcid.id]] <- authorinfo()
         output$theauthorinfo_tot <- renderText({
-            paste("TEST2",input$addauthor)
+            #paste("TEST2",input$addauthor)
+            
+            
+            paste(as.yaml(RVAL$authorlist), indent.mapping.sequence=TRUE)
         })
         
     })
