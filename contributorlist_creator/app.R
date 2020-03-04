@@ -21,8 +21,8 @@ creditlist <- read_delim("dependencies/creditroles.csv","\t", escape_double = FA
 ui <- fluidPage(
     
     # Application title
-    titlePanel("Author manager"),
-    tags$h6('Distributed under MIT license,'), tags$a(href="https://github.com/open-science-promoters/contibutor_manager/issues", "Report issues here"),
+    titlePanel("Contributor list creator"),
+    tags$h6('Distributed under MIT license, wait a few second for orcid link to be made.'), tags$a(href="https://github.com/open-science-promoters/contibutor_manager/issues", "Report issues here"),
     tags$br() ,
     tags$a(href="https://casrai.org/credit/", "More information about the contribution roles here!"),
     tags$h2("Create or port an author list in a specific format"),
@@ -30,9 +30,10 @@ ui <- fluidPage(
     # fluidrow 
     fluidRow(
         column (4,
-            textInput(inputId = "orcid.id",
-                      label = "enter an ORCID ID (16 digits with 3 dashes):",
-                      value='0000-0001-6339-0374'),
+            textInput(inputId = "orcid.id_add",
+                      label = "Add authors by pasting a list of ORCID ID, you can add many at once using commas, spaces or line breaks:",
+                      value=''),
+            selectInput (inputId = "orcid.id", label = "Choose author to update its info", choices = ""),
             radioButtons ("corresp_author", "Is corresponding author ?", c("yes" = TRUE, "no" = FALSE)
             ),
             checkboxGroupInput("affiliation", label="multiple choice possible:",
@@ -71,7 +72,9 @@ ui <- fluidPage(
 # Define server logic 
 server <- function(input, output, session) {
     
-    RVAL= reactiveValues(authorlist = list())
+    RVAL= reactiveValues(authorlist = list(), authors_orcid= list("test"='0000-0002-4964-9420'))
+    
+    
 
     output$Namefromid <- renderText({
         x=rorcid::orcid_id(input$orcid.id)
@@ -80,9 +83,26 @@ server <- function(input, output, session) {
     })
     
 
+    observe({
+        xlist <- input$orcid.id_add
+        
+        y=trimws(strsplit(xlist, split = "[, \n]+")[[1]])
+        
+        for (x in y){
+            testconn = try(rorcid::orcid_id(x)[[1]])
+            if (class (testconn) == "list") {
+                RVAL$authors_orcid [[paste(testconn$name$`given-names`, testconn$name$`family-name`, sep= " ")]] = x
+            }
+        }
+        if (length(RVAL$authors_orcid)>1) {RVAL$authors_orcid[["test"]] = NULL}
     
+        updateSelectInput(session, inputId = "orcid.id", choices = RVAL$authors_orcid,
+                          selected = NULL)
+    })
     observe({
         x <- input$orcid.id
+        
+        
 
         updateCheckboxGroupInput(session, "affiliation",
                                  label = "choose affiliations",
