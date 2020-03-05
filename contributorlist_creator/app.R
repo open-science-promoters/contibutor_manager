@@ -30,39 +30,47 @@ ui <- fluidPage(
     # fluidrow 
     fluidRow(
         column (4,
-            textInput(inputId = "orcid.id_add",
+            textAreaInput(inputId = "orcid.id_add",
                       label = "Add authors by pasting a list of ORCID ID, you can add many at once using commas, spaces or line breaks:",
                       value=''),
+            actionButton(inputId ="addorcid", label ="add the authors listed"),
             selectInput (inputId = "orcid.id", label = "Choose author to update its info", choices = ""),
-            radioButtons ("corresp_author", "Is corresponding author ?", c("yes" = TRUE, "no" = FALSE)
-            ),
-            checkboxGroupInput("affiliation", label="multiple choice possible:",
-                               choices = "set orcid first"),
+            actionButton("addauthorinfo", "Save modifications about the author information", icon("save")),
+            actionButton(inputId = "erase_author", label= "take this author off the list.", icon("trash")) 
             
-        
-            checkboxGroupInput("funding", label="multiple choice possible:",
-                               choices = "set orcid first")
         ),
 
         # Show a plot of the generated distribution
         column (4,
+                radioButtons ("corresp_author", "Is corresponding author ?", c("yes" = TRUE, "no" = FALSE)
+                ),
+                checkboxGroupInput("affiliation", label="multiple choice possible:",
+                                   choices = "set orcid first"),
                 
-                "Indicate contribution for:",
-                tags$b(textOutput("Namefromid")),
-                radioButtons("contribution_type", "specify if not author:",
-                                   choices = c("author", "research assistant", "editor"), selected = "author"),
-                checkboxGroupInput("creditinfo", "multiple choice possible:",
-                                   creditlist$Term, selected = "Writing – review & editing")    
+                
+                checkboxGroupInput("funding", label="multiple choice possible:",
+                                   choices = "set orcid first")
+                    
         ),
         column (4,
                 
-
-                verbatimTextOutput("theauthorinfo")
+                
+                
+                tags$b("Indicate contribution for:", textOutput("Namefromid")),
+                radioButtons("contribution_type", "specify if not author:",
+                             choices = c("author", "research assistant", "editor"), selected = "author"),
+                checkboxGroupInput("creditinfo", "multiple choice possible:",
+                                   creditlist$Term, selected = "Writing – review & editing")
         )
     ),fluidRow(
-        column (12,
+        column (4,
                 
-                actionButton("addauthor", "Add (or modify) information about the author"),
+                
+                verbatimTextOutput("theauthorinfo")
+        ),
+        column (8,
+                
+                actionButton("addauthor", "Refresh author list.", icon = icon("refresh")),
                 verbatimTextOutput("theauthorinfo_tot")
                 
         )
@@ -75,6 +83,8 @@ server <- function(input, output, session) {
     RVAL= reactiveValues(authorlist = list(), authors_orcid= list("test"='0000-0002-4964-9420'))
     
     
+    
+    
 
     output$Namefromid <- renderText({
         x=rorcid::orcid_id(input$orcid.id)
@@ -83,7 +93,7 @@ server <- function(input, output, session) {
     })
     
 
-    observe({
+    observeEvent(input$addorcid,{
         xlist <- input$orcid.id_add
         
         y=trimws(strsplit(xlist, split = "[, \n]+")[[1]])
@@ -95,9 +105,15 @@ server <- function(input, output, session) {
             }
         }
         if (length(RVAL$authors_orcid)>1) {RVAL$authors_orcid[["test"]] = NULL}
-    
-        updateSelectInput(session, inputId = "orcid.id", choices = RVAL$authors_orcid,
-                          selected = NULL)
+        
+        for (i in c(1: length(RVAL$authors_orcid))){
+            if (is.null (RVAL$authorlist[[RVAL$authors_orcid[[i]]]])) {
+                RVAL$authorlist[[RVAL$authors_orcid[[i]] ]] = createauthorinfo (ORCID=RVAL$authors_orcid[[i]], credit = input$creditinfo)
+            }
+        }
+        
+        
+        
     })
     observe({
         x <- input$orcid.id
@@ -132,6 +148,9 @@ server <- function(input, output, session) {
         
     })    
     
+    observe ({updateSelectInput(session, inputId = "orcid.id", choices = RVAL$authors_orcid,
+                      selected = NULL)
+    })
     
     authorinfo <- reactive({
          createauthorinfo (ORCID=input$orcid.id, 
@@ -147,17 +166,42 @@ server <- function(input, output, session) {
         as.yaml(authorinfo(), indent.mapping.sequence=TRUE)
         }) 
     
+    output$theauthorinfo_tot <- renderText({
+        #paste("TEST2",input$addauthor)
+        
+        
+        paste(as.yaml(RVAL$authorlist), indent.mapping.sequence=TRUE)
+    })
+    ## when button to modify author list is pushed, create authorlist from information given, erase elements not in authors_orcid, create yaml output for visualisation
+    # observe (
+    #     RVAL$authorlist[[input$orcid.id]] <-  authorinfo()
+    # )
+        
+    observeEvent (input$addauthorinfo,{
+        RVAL$authorlist[[input$orcid.id]] <-  authorinfo()
+    })
+        
     
     observeEvent (input$addauthor,{
-        RVAL$authorlist[[input$orcid.id]] <- authorinfo()
-        output$theauthorinfo_tot <- renderText({
-            #paste("TEST2",input$addauthor)
-            
-            
-            paste(as.yaml(RVAL$authorlist), indent.mapping.sequence=TRUE)
-        })
         
-    })
+        
+        for (i in c(1: length(names(RVAL$authorlist)))){
+            if (!(names(RVAL$authorlist)[i] %in% RVAL$authors_orcid)) {RVAL$authorlist[[i]] <- NULL} 
+        }
+    })    
+        
+   
+        
+    observeEvent(input$erase_author, {
+        RVAL$authors_orcid = RVAL$authors_orcid[RVAL$authors_orcid != input$orcid.id]
+        if (length (RVAL$authors_orcid)==0 ) RVAL$authors_orcidauthors_orcid= list("test"='0000-0002-4964-9420')
+        
+        
+    })    
+        
+          
+        
+
 }
 
 # Run the application 
