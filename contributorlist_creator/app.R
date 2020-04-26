@@ -13,6 +13,7 @@ library (readr)
 library(yaml)
 
 source("dependencies/functions.r", local=TRUE)
+source("dependencies/uploadlist.r", local=TRUE)
 
 creditlist <- read_delim("dependencies/creditroles.csv","\t", escape_double = FALSE, trim_ws = TRUE)
 
@@ -30,10 +31,7 @@ ui <- fluidPage(
     # fluidrow 
     fluidRow(
         column (4,
-            textAreaInput(inputId = "orcid.id_add",
-                      label = "Add authors by pasting a list of ORCID ID, you can add many at once using commas, spaces or line breaks:",
-                      value=''),
-            actionButton(inputId ="addorcid", label ="add the authors listed"),
+                orcidlistInput(id="inputauthor", label = "Counter1"),
             selectInput (inputId = "orcid.id", label = "Choose author to update its info", choices = ""),
             actionButton("addauthorinfo", "Save modifications about the author information", icon("save")),
             actionButton(inputId = "erase_author", label= "take this author off the list.", icon("trash")) 
@@ -93,28 +91,10 @@ server <- function(input, output, session) {
     })
     
 
-    observeEvent(input$addorcid,{
-        xlist <- input$orcid.id_add
-        
-        y=trimws(strsplit(xlist, split = "[, \n]+")[[1]])
-        
-        for (x in y){
-            testconn = try(rorcid::orcid_id(x)[[1]])
-            if (class (testconn) == "list") {
-                RVAL$authors_orcid [[paste(testconn$name$`given-names`, testconn$name$`family-name`, sep= " ")]] = x
-            }
-        }
-        if (length(RVAL$authors_orcid)>1) {RVAL$authors_orcid[["test"]] = NULL}
-        
-        for (i in c(1: length(RVAL$authors_orcid))){
-            if (is.null (RVAL$authorlist[[RVAL$authors_orcid[[i]]]])) {
-                RVAL$authorlist[[RVAL$authors_orcid[[i]] ]] = createauthorinfo (ORCID=RVAL$authors_orcid[[i]], credit = input$creditinfo)
-            }
-        }
-        
-        
-        
-    })
+    callModule(addauthororcid_back, "inputauthor")
+    
+    
+    
     observe({
         x <- input$orcid.id
         
