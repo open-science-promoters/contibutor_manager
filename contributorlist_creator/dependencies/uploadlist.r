@@ -1,3 +1,5 @@
+#add authors from list
+
 orcidlistInput <- function (id, label = "inputorcid"){
   ns <- NS(id)
   
@@ -36,4 +38,49 @@ addauthororcid_back <- function(input, output, session){
     
     
   })
+}
+
+## change info one author
+
+oneauthor_ui <- function(){
+  tagList(
+  selectInput (inputId = "orcid.id", label = "Choose author to update its info", choices = ""),
+  actionButton("addauthorinfo", "Save modifications about the author information", icon("save")),
+  actionButton(inputId = "erase_author", label= "take this author off the list.", icon("trash"))
+  )
+}
+
+oneauthorinfo_ui <- function(){
+  tagList(
+    fluidRow(   
+      column (4,
+              oneauthor_ui() 
+              
+      ),
+      
+      # Show a plot of the generated distribution
+      column (4,
+              radioButtons ("corresp_author", "Is corresponding author ?", c("yes" = TRUE, "no" = FALSE)
+              ),
+              radioButtons("contribution_type", "specify if not author:",
+                           choices = c("author", "research assistant", "editor"), selected = "author"),
+              checkboxGroupInput("affiliation", label="multiple choice possible:",
+                                 choices = "set orcid first"),
+              
+              
+              checkboxGroupInput("funding", label="multiple choice possible:",
+                                 choices = "set orcid first")
+              
+      ),
+      column (4,
+              
+              
+              
+              tags$b("Indicate contribution for:", textOutput("Namefromid")),
+              
+              checkboxGroupInput("creditinfo", "multiple choice possible:",
+                                 creditlist$Term, selected = "Writing – review & editing")
+      )
+    )
+  )
 }

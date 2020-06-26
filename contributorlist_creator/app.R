@@ -29,51 +29,31 @@ ui <- fluidPage(
     tags$h2("Create or port an author list in a specific format"),
 
     # fluidrow 
-    fluidRow(
-        column (4,
-                orcidlistInput(id="inputauthor", label = "Counter1"),
-            selectInput (inputId = "orcid.id", label = "Choose author to update its info", choices = ""),
-            actionButton("addauthorinfo", "Save modifications about the author information", icon("save")),
-            actionButton(inputId = "erase_author", label= "take this author off the list.", icon("trash")) 
-            
+   
+        tabsetPanel(type = "tabs",
+                    tabPanel("Input", orcidlistInput(id="inputauthor", label = "Counter1")),
+                    tabPanel("Each authors" ,oneauthorinfo_ui()),
+                    tabPanel("affiliation" ),
+                    tabPanel("export")
         ),
-
-        # Show a plot of the generated distribution
-        column (4,
-                radioButtons ("corresp_author", "Is corresponding author ?", c("yes" = TRUE, "no" = FALSE)
-                ),
-                checkboxGroupInput("affiliation", label="multiple choice possible:",
-                                   choices = "set orcid first"),
-                
-                
-                checkboxGroupInput("funding", label="multiple choice possible:",
-                                   choices = "set orcid first")
+        fluidRow(
+            column (6,
                     
-        ),
-        column (4,
-                
-                
-                
-                tags$b("Indicate contribution for:", textOutput("Namefromid")),
-                radioButtons("contribution_type", "specify if not author:",
-                             choices = c("author", "research assistant", "editor"), selected = "author"),
-                checkboxGroupInput("creditinfo", "multiple choice possible:",
-                                   creditlist$Term, selected = "Writing – review & editing")
-        )
-    ),fluidRow(
-        column (4,
-                
-                
-                verbatimTextOutput("theauthorinfo")
-        ),
-        column (8,
-                
-                actionButton("addauthor", "Refresh author list.", icon = icon("refresh")),
-                verbatimTextOutput("theauthorinfo_tot")
-                
+                    
+                    verbatimTextOutput("theauthorinfo")
+            ),
+            column (6,
+                    
+                    actionButton("addauthor", "Refresh author list.", icon = icon("refresh")),
+                    verbatimTextOutput("theauthorinfo_tot")
+                    
+            )
         )
     )
-)
+
+    
+    
+
 
 # Define server logic 
 server <- function(input, output, session) {
