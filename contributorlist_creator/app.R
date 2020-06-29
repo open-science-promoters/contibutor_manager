@@ -34,7 +34,7 @@ ui <- fluidPage(
                     tabPanel("Input", orcidlistInput(id="inputauthor", label = "Counter1")),
                     
                     tabPanel("Contributors information" ,oneauthorinfo_ui()),
-                    tabPanel("Contributors role",contribution_role() ),
+                    tabPanel("Contributors role",contribution_role_ui(id="id") ),
                     tabPanel("Merge affiliations" ),
                     tabPanel("Merge funding" ),
                     tabPanel("export")
@@ -61,8 +61,9 @@ ui <- fluidPage(
 # Define server logic 
 server <- function(input, output, session) {
     
-    RVAL= reactiveValues(authorlist = list(), authors_orcid= list("test"='0000-0002-4964-9420'))
-    
+    RVAL= reactiveValues(authorlist = list(), 
+                         authors_orcid= list("test"='0000-0002-4964-9420'),
+                         creditlist= creditlist)
     
     
     
@@ -75,6 +76,11 @@ server <- function(input, output, session) {
     
 
     RVAL= callModule(addauthororcid_back, "inputauthor", RVAL=RVAL)
+    RVAL= callModule(preselectroles, "id", RVAL=RVAL)
+    
+    observe({
+        updateCheckboxGroupInput(session, label="multiple choice possible:", inputId= "creditinfo", RVAL$creditlist$Term, selected = "author role--writing review and editing role")
+ })
     
 
     observe({
