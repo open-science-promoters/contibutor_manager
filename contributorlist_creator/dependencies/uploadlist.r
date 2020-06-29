@@ -18,11 +18,12 @@ orcidlistInput <- function (id, label = "inputorcid"){
 ## change info one author
 # Choose one author in the list -UI
 
-oneauthor_ui <- function(){
+oneauthor_ui <- function(id){
+  ns <- NS(id)
   tagList(
-  selectInput (inputId = "orcid.id", label = "Choose author to update its info", choices = ""),
-  actionButton("addauthorinfo", "Save modifications about the author information", icon("save")),
-  actionButton(inputId = "erase_author", label= "take this author off the list.", icon("trash"))
+  selectInput (inputId = ns("orcid.id"), label = "Choose author to update its info", choices = ""),
+  actionButton(ns("addauthorinfo"), "Save modifications about the author information", icon("save")),
+  actionButton(inputId = ns("erase_author"), label= "take this author off the list.", icon("trash"))
   )
 }
 
@@ -31,7 +32,7 @@ oneauthorinfo_ui <- function(){
   tagList(
     fluidRow(   
       column (4,
-              oneauthor_ui() 
+              oneauthor_ui("Ainfo") 
               
       ),
       
@@ -65,7 +66,7 @@ contribution_role_ui <- function(id){
   tagList(
     fluidRow(   
       column (4,
-              oneauthor_ui() ,
+              oneauthor_ui("Arole") ,
               
               
       ),
@@ -145,3 +146,34 @@ preselectroles <- function(input, output, session, RVAL){
 
  return(RVAL)   
 }
+
+
+# update author information
+update_author_info <- function(input, output, session, RVAL, authorinfo){
+  observe({
+    updateSelectInput(session, inputId = "orcid.id", choices = RVAL$authors_orcid,
+                      selected = RVAL$currentauthor)
+  })
+  
+  observeEvent(input$orcid.id,{
+    RVAL$currentauthor <- input$orcid.id
+  })
+  
+  observeEvent (input$addauthorinfo,{
+    RVAL$authorlist[[RVAL$currentauthor]] <-  authorinfo()
+  })
+  
+  observeEvent(input$erase_author, {
+    RVAL$authors_orcid = RVAL$authors_orcid[RVAL$authors_orcid != RVAL$currentauthor]
+    if (length (RVAL$authors_orcid)==0 ) RVAL$authors_orcidauthors_orcid= list("test"='0000-0002-4964-9420')
+
+  }) 
+  
+  
+  
+  return (RVAL)
+}
+
+
+ 
+

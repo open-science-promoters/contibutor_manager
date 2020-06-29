@@ -11,6 +11,7 @@ library(shiny)
 library (rorcid)
 library (readr)
 library(yaml)
+library(dplyr)
 
 source("dependencies/functions.r", local=TRUE)
 source("dependencies/uploadlist.r", local=TRUE)
@@ -26,7 +27,7 @@ ui <- fluidPage(
     tags$h6('Distributed under MIT license, wait a few second for orcid link to be made.'), tags$a(href="https://github.com/open-science-promoters/contibutor_manager/issues", "Report issues here"),
     tags$br() ,
     tags$a(href="https://casrai.org/credit/", "More information about the contribution roles here!"),
-    tags$h2("Create or port an author list in a specific format"),
+    tags$h2("Create or port an author list in a specific format. test with 0000-0002-3127-5520, 0000-0003-3325-9038"),
 
     # fluidrow 
    
@@ -34,7 +35,7 @@ ui <- fluidPage(
                     tabPanel("Input", orcidlistInput(id="inputauthor", label = "Counter1")),
                     
                     tabPanel("Contributors information" ,oneauthorinfo_ui()),
-                    tabPanel("Contributors role",contribution_role_ui(id="id") ),
+                    tabPanel("Contributors role",contribution_role_ui("id") ),
                     tabPanel("Merge affiliations" ),
                     tabPanel("Merge funding" ),
                     tabPanel("export")
@@ -63,72 +64,75 @@ server <- function(input, output, session) {
     
     RVAL= reactiveValues(authorlist = list(), 
                          authors_orcid= list("test"='0000-0002-4964-9420'),
+                         currentauthor = '0000-0002-4964-9420',
                          creditlist= creditlist)
     
     
     
 
     output$Namefromid <- renderText({
-        x=rorcid::orcid_id(input$orcid.id)
+        x=rorcid::orcid_id(RVAL$currentauthor)
         return (paste(x[[1]]$`name`$`given-names`$value,
                       x[[1]]$`name`$`family-name`$value))
     })
     
-
+## adding authors
     RVAL= callModule(addauthororcid_back, "inputauthor", RVAL=RVAL)
+## contribution role: filter and update choice    
     RVAL= callModule(preselectroles, "id", RVAL=RVAL)
-    
     observe({
         updateCheckboxGroupInput(session, label="multiple choice possible:", inputId= "creditinfo", RVAL$creditlist$Term, selected = "author role--writing review and editing role")
  })
     
 
-    observe({
-        x <- input$orcid.id
+    ## create author information from updated inputs    
+    authorinfo <- reactive({
+        createauthorinfo (ORCID=RVAL$currentauthor, 
+                          credit = input$creditinfo, 
+                          affiliationl = input$affiliation,
+                          is_corresponding_author = input$corresp_author,
+                          `contrib-type` = input$contribution_type,
+                          funding = input$funding)
         
-        
-
-        updateCheckboxGroupInput(session, "affiliation",
-                                 label = "choose affiliations",
-                                 choices = affiliationfromorcid(x),
-                                 selected = RVAL$authorlist[[input$orcid.id]]$affiliation,
-        )
-        
-        
-        updateCheckboxGroupInput(session, "funding",
-                                 label = "choose funding",
-                                 choices = fundingfromorcid(x),
-                                 selected = RVAL$authorlist[[input$orcid.id]]$funders,
-                                 
-        )
-        
-        updateCheckboxGroupInput(session, "creditinfo",
-                                 selected = RVAL$authorlist[[input$orcid.id]]$role,
-        )
-        
-        updateRadioButtons(session, "contribution_type",
-                                 selected = RVAL$authorlist[[input$orcid.id]]$.attrs$`contrib-type`,
-        )
-        
-        updateRadioButtons(session, "corresp_author",
-                           selected = RVAL$authorlist[[input$orcid.id]]$.attrs$`corresponding-author`,
-        )
-        
-    })    
+    })  
     
-    observe ({updateSelectInput(session, inputId = "orcid.id", choices = RVAL$authors_orcid,
-                      selected = NULL)
+## update info author
+    RVAL=callModule(update_author_info, "Arole", RVAL=RVAL, authorinfo=authorinfo)
+    RVAL=callModule(update_author_info, "Ainfo", RVAL=RVAL, authorinfo=authorinfo)
+    
+    observe ({
+    updateCheckboxGroupInput(session, "affiliation",
+                             label = "choose affiliations",
+                             choices = affiliationfromorcid(RVAL$currentauthor),
+                             selected = RVAL$authorlist[[RVAL$currentauthor]]$affiliation,
+    )
+    
+    
+    updateCheckboxGroupInput(session, "funding",
+                             label = "choose funding",
+                             choices = fundingfromorcid(RVAL$currentauthor),
+                             selected = RVAL$authorlist[[RVAL$currentauthor]]$funders,
+                             
+    )
+    
+    updateCheckboxGroupInput(session, "creditinfo",
+                             selected = RVAL$authorlist[[RVAL$currentauthor]]$role,
+    )
+    
+    updateRadioButtons(session, "contribution_type",
+                       selected = RVAL$authorlist[[RVAL$currentauthor]]$.attrs$`contrib-type`,
+    )
+    
+    updateRadioButtons(session, "corresp_author",
+                       selected = RVAL$authorlist[[RVAL$currentauthor]]$.attrs$`corresponding-author`,
+    )
     })
     
-    authorinfo <- reactive({
-         createauthorinfo (ORCID=input$orcid.id, 
-                                            credit = input$creditinfo, 
-                                            affiliationl = input$affiliation,
-                                            is_corresponding_author = input$corresp_author,
-                                            `contrib-type` = input$contribution_type,
-                                            funding = input$funding)
+  
         
-    })    
+    
+    
+   
     
     output$theauthorinfo <- renderText({
         as.yaml(authorinfo(), indent.mapping.sequence=TRUE)
@@ -145,9 +149,7 @@ server <- function(input, output, session) {
     #     RVAL$authorlist[[input$orcid.id]] <-  authorinfo()
     # )
         
-    observeEvent (input$addauthorinfo,{
-        RVAL$authorlist[[input$orcid.id]] <-  authorinfo()
-    })
+
         
     
     observeEvent (input$addauthor,{
@@ -160,12 +162,7 @@ server <- function(input, output, session) {
         
    
         
-    observeEvent(input$erase_author, {
-        RVAL$authors_orcid = RVAL$authors_orcid[RVAL$authors_orcid != input$orcid.id]
-        if (length (RVAL$authors_orcid)==0 ) RVAL$authors_orcidauthors_orcid= list("test"='0000-0002-4964-9420')
-        
-        
-    })    
+    
         
           
         
