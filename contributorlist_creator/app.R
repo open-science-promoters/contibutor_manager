@@ -32,8 +32,11 @@ ui <- fluidPage(
    
         tabsetPanel(type = "tabs",
                     tabPanel("Input", orcidlistInput(id="inputauthor", label = "Counter1")),
-                    tabPanel("Each authors" ,oneauthorinfo_ui()),
-                    tabPanel("affiliation" ),
+                    
+                    tabPanel("Contributors information" ,oneauthorinfo_ui()),
+                    tabPanel("Contributors role",contribution_role() ),
+                    tabPanel("Merge affiliations" ),
+                    tabPanel("Merge funding" ),
                     tabPanel("export")
         ),
         fluidRow(
@@ -71,10 +74,9 @@ server <- function(input, output, session) {
     })
     
 
-    callModule(addauthororcid_back, "inputauthor")
+    RVAL= callModule(addauthororcid_back, "inputauthor", RVAL=RVAL)
     
-    
-    
+
     observe({
         x <- input$orcid.id
         

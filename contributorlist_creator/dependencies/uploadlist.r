@@ -12,9 +12,9 @@ orcidlistInput <- function (id, label = "inputorcid"){
 }
 
 
-addauthororcid_back <- function(input, output, session){
+addauthororcid_back <- function(input, output, session, RVAL){
   
-  RVAL= reactiveValues(authorlist = list(), authors_orcid= list("test"='0000-0002-4964-9420'))
+  #RVAL= reactiveValues(authorlist = list(), authors_orcid= list("test"='0000-0002-4964-9420'))
   
   observeEvent(input$addorcid,{
     xlist <- input$orcid.id_add
@@ -38,6 +38,7 @@ addauthororcid_back <- function(input, output, session){
     
     
   })
+  return(RVAL)
 }
 
 ## change info one author
@@ -64,17 +65,44 @@ oneauthorinfo_ui <- function(){
               ),
               radioButtons("contribution_type", "specify if not author:",
                            choices = c("author", "research assistant", "editor"), selected = "author"),
+              
+              
+      ),
+      column (4,
+              
+              
+              
               checkboxGroupInput("affiliation", label="multiple choice possible:",
                                  choices = "set orcid first"),
               
               
               checkboxGroupInput("funding", label="multiple choice possible:",
                                  choices = "set orcid first")
+      )
+    )
+  )
+}
+
+
+contribution_role <- function(){
+  tagList(
+    fluidRow(   
+      column (4,
+              oneauthor_ui() ,
+              
               
       ),
+      
+      
       column (4,
+              radioButtons("creditchoice_domaing", "filter role by research domain:",
+                                 c("all", "STEM", "SSH"), selected = "all"),
+              radioButtons("creditchoice_output", "filter role by research output:",
+                                 c("all","publication", "dataset", "software"), selected = "all")
               
-              
+      ),
+      
+      column (4,
               
               tags$b("Indicate contribution for:", textOutput("Namefromid")),
               
@@ -84,3 +112,6 @@ oneauthorinfo_ui <- function(){
     )
   )
 }
+
+
+
