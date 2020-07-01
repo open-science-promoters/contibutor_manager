@@ -95,6 +95,97 @@ contribution_role_ui <- function(id){
   )
 }
 
+# work with affiliation
+affiliation_ui <- function (id){
+  ns <- NS(id)
+   
+  fluidRow(   
+    column (4,
+            selectInput(ns("aff_pre"), label = "affiliation imported from orcid", choices = c() ),
+    ),
+    column (4,
+            textInput(ns("aff_add"), label= "enter affiliation manually"),
+            actionButton(inputId =ns("change_affiliationfromtext"), label ="change affiliation to the entered text"),
+            tags$hr(),
+            selectInput(ns("aff_post"), label = "change affiliation to another in the list", choices = c()),
+            actionButton(inputId =ns("change_affiliation"), label ="change_affiliation to the chosen affiliation"),
+    ),
+    column (4,
+            
+            renderTable(RVAL$affliation_change),
+            actionButton(inputId =ns("merge"), label ="go to R"),
+            DT::dataTableOutput(ns("affiliation_matrix"))
+            
+    ),
+  )
+  
+}
+
+affiliation_back <- function(input, output, session, RVAL){
+  
+  ## put inputs into RVal
+  #RVAL$aff_pre = reactive (input$aff_pre)
+  #RVAL$aff_post = reactive (input$aff_post)
+  
+  observeEvent(RVAL$authorlist,{
+    # get all affiliation from author list, only if author list is >0
+    if (length(RVAL$authorlist)>0){
+      aff= c()
+      for (i in names(RVAL$authorlist)){
+        aff=c(aff,RVAL$authorlist[[i]]$affiliation)
+      }
+      RVAL$affliation_pre = unique(as.character (unlist(aff)))
+      
+      # initiate or update RVAL$affliation_change with new affliations
+      if (length(RVAL$affliation_change) == 0) {
+        RVAL$affliation_change = data.frame ("pre"=RVAL$affliation_pre, "post"= NA, stringsAsFactors=FALSE)
+      } else {
+        RVAL$affliation_change = left_join (data.frame ("pre"=RVAL$affliation_pre, stringsAsFactors=FALSE),RVAL$affliation_change)
+      }
+    }
+    
+
+  })
+ 
+
+  observe({
+    updateSelectInput(session,"aff_pre", choices =  RVAL$affliation_pre)
+  })
+  observe({
+    updateSelectInput(session,"aff_post", choices = c(RVAL$affliation_choice,input$aff_pre))
+  })
+  observe({
+    RVAL$affliation_choice = unique(c(RVAL$affliation_change$post, RVAL$affliation_change$pre[is.na (RVAL$affliation_change$post)]))
+  })
+  observe({
+    output$affiliation_matrix <- DT::renderDataTable(RVAL$affliation_change)
+  })
+  
+  observeEvent(input$change_affiliation,{
+    RVAL$affliation_change= RVAL$affliation_change %>%
+      mutate (post =ifelse(
+        (RVAL$affliation_change$pre == input$aff_pre | RVAL$affliation_change$pre == input$aff_post),
+        as.character(input$aff_post),
+        post)
+      )
+  })
+  
+  observeEvent(input$change_affiliationfromtext,{
+    RVAL$affliation_change= RVAL$affliation_change %>%
+      mutate (post =ifelse(
+        (RVAL$affliation_change$pre == input$aff_pre | RVAL$affliation_change$pre == input$aff_post),
+        as.character(input$aff_add),
+        post)
+      )
+  })
+  
+  
+  observeEvent (input$merge,{
+    
+    browser()
+  })
+  return (RVAL)
+}
 ### SERVER SIDE
 
 #add authors from list- server
@@ -175,5 +266,5 @@ update_author_info <- function(input, output, session, RVAL, authorinfo){
 }
 
 
- 
+
 

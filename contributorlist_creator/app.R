@@ -19,7 +19,7 @@ source("dependencies/uploadlist.r", local=TRUE)
 creditlist <- read_delim("dependencies/creditroles.csv","\t", escape_double = FALSE, trim_ws = TRUE)
 
 
-# Define UI for application that draws a histogram
+
 ui <- fluidPage(
     
     # Application title
@@ -36,7 +36,7 @@ ui <- fluidPage(
                     
                     tabPanel("Contributors information" ,oneauthorinfo_ui()),
                     tabPanel("Contributors role",contribution_role_ui("id") ),
-                    tabPanel("Merge affiliations" ),
+                    tabPanel("Merge affiliations", affiliation_ui("aff") ),
                     tabPanel("Merge funding" ),
                     tabPanel("export")
         ),
@@ -65,7 +65,10 @@ server <- function(input, output, session) {
     RVAL= reactiveValues(authorlist = list(), 
                          authors_orcid= list("test"='0000-0002-4964-9420'),
                          currentauthor = '0000-0002-4964-9420',
-                         creditlist= creditlist)
+                         creditlist= creditlist,
+                         affliation_change = data.frame("pre"= "test", "post" = NA),
+                         affliation_choice=c()
+                         )
     
     
     
@@ -85,7 +88,7 @@ server <- function(input, output, session) {
  })
     
 
-    ## create author information from updated inputs    
+## function to create author information from updated inputs for the "currentauthor"   
     authorinfo <- reactive({
         createauthorinfo (ORCID=RVAL$currentauthor, 
                           credit = input$creditinfo, 
@@ -99,7 +102,7 @@ server <- function(input, output, session) {
 ## update info author
     RVAL=callModule(update_author_info, "Arole", RVAL=RVAL, authorinfo=authorinfo)
     RVAL=callModule(update_author_info, "Ainfo", RVAL=RVAL, authorinfo=authorinfo)
-    
+# update box choices    
     observe ({
     updateCheckboxGroupInput(session, "affiliation",
                              label = "choose affiliations",
@@ -129,43 +132,34 @@ server <- function(input, output, session) {
     })
     
   
-        
-    
-    
-   
-    
-    output$theauthorinfo <- renderText({
-        as.yaml(authorinfo(), indent.mapping.sequence=TRUE)
-        }) 
-    
-    output$theauthorinfo_tot <- renderText({
-        #paste("TEST2",input$addauthor)
-        
-        
-        paste(as.yaml(RVAL$authorlist), indent.mapping.sequence=TRUE)
-    })
-    ## when button to modify author list is pushed, create authorlist from information given, erase elements not in authors_orcid, create yaml output for visualisation
-    # observe (
-    #     RVAL$authorlist[[input$orcid.id]] <-  authorinfo()
-    # )
-        
-
-        
-    
+    # refresh list (especially if authors were removed)
     observeEvent (input$addauthor,{
-        
         
         for (i in c(1: length(names(RVAL$authorlist)))){
             if (!(names(RVAL$authorlist)[i] %in% RVAL$authors_orcid)) {RVAL$authorlist[[i]] <- NULL} 
         }
     })    
+    
+    
+   
+    # render information in yaml text
+    output$theauthorinfo <- renderText({
+        as.yaml(authorinfo(), indent.mapping.sequence=TRUE)
+        }) 
+    
+    output$theauthorinfo_tot <- renderText({
+        paste(as.yaml(RVAL$authorlist), indent.mapping.sequence=TRUE)
+    })
+
+        
+## work with affilitation
+
+    RVAL = callModule (affiliation_back,id="aff", RVAL=RVAL)
+    
+    
+     
         
    
-        
-    
-        
-          
-        
 
 }
 
