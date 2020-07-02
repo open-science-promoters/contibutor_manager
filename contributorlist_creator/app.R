@@ -27,8 +27,9 @@ ui <- fluidPage(
     tags$h6('Distributed under MIT license, wait a few second for orcid link to be made.'), tags$a(href="https://github.com/open-science-promoters/contibutor_manager/issues", "Report issues here"),
     tags$br() ,
     tags$a(href="https://casrai.org/credit/", "More information about the contribution roles here!"),
-    tags$h2("Create or port an author list in a specific format. test with 0000-0002-3127-5520, 0000-0003-3325-9038"),
-
+    tags$h2("Create or port an author list in a specific format."), 
+    tags$h6(" You can test it pasting these 2 orcid numbers in the orcid input field 0000-0002-3127-5520, 0000-0002-4964-9420"),
+    
     # fluidrow 
    
         tabsetPanel(type = "tabs",
@@ -37,8 +38,8 @@ ui <- fluidPage(
                     tabPanel("Contributors information" ,oneauthorinfo_ui()),
                     tabPanel("Contributors role",contribution_role_ui("id") ),
                     tabPanel("Merge affiliations", affiliation_ui("aff") ),
-                    tabPanel("Merge funding" ),
-                    tabPanel("export")
+                    tabPanel("Merge funding", mergefunding_ui("fund") ),
+                    tabPanel("export", export_ui ("export"))
         ),
         fluidRow(
             column (6,
