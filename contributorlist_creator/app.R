@@ -11,13 +11,15 @@ library(shiny)
 library (rorcid)
 library (readr)
 library(yaml)
+library(dplyr)
 
 source("dependencies/functions.r", local=TRUE)
+source("dependencies/uploadlist.r", local=TRUE)
 
 creditlist <- read_delim("dependencies/creditroles.csv","\t", escape_double = FALSE, trim_ws = TRUE)
 
 
-# Define UI for application that draws a histogram
+
 ui <- fluidPage(
     
     # Application title
@@ -25,182 +27,139 @@ ui <- fluidPage(
     tags$h6('Distributed under MIT license, wait a few second for orcid link to be made.'), tags$a(href="https://github.com/open-science-promoters/contibutor_manager/issues", "Report issues here"),
     tags$br() ,
     tags$a(href="https://casrai.org/credit/", "More information about the contribution roles here!"),
-    tags$h2("Create or port an author list in a specific format"),
+    tags$h2("Create or port an author list in a specific format. test with 0000-0002-3127-5520, 0000-0003-3325-9038"),
 
     # fluidrow 
-    fluidRow(
-        column (4,
-            textAreaInput(inputId = "orcid.id_add",
-                      label = "Add authors by pasting a list of ORCID ID, you can add many at once using commas, spaces or line breaks:",
-                      value=''),
-            actionButton(inputId ="addorcid", label ="add the authors listed"),
-            selectInput (inputId = "orcid.id", label = "Choose author to update its info", choices = ""),
-            actionButton("addauthorinfo", "Save modifications about the author information", icon("save")),
-            actionButton(inputId = "erase_author", label= "take this author off the list.", icon("trash")) 
-            
-        ),
-
-        # Show a plot of the generated distribution
-        column (4,
-                radioButtons ("corresp_author", "Is corresponding author ?", c("yes" = TRUE, "no" = FALSE)
-                ),
-                checkboxGroupInput("affiliation", label="multiple choice possible:",
-                                   choices = "set orcid first"),
-                
-                
-                checkboxGroupInput("funding", label="multiple choice possible:",
-                                   choices = "set orcid first")
+   
+        tabsetPanel(type = "tabs",
+                    tabPanel("Input", orcidlistInput(id="inputauthor", label = "Counter1")),
                     
+                    tabPanel("Contributors information" ,oneauthorinfo_ui()),
+                    tabPanel("Contributors role",contribution_role_ui("id") ),
+                    tabPanel("Merge affiliations", affiliation_ui("aff") ),
+                    tabPanel("Merge funding" ),
+                    tabPanel("export")
         ),
-        column (4,
-                
-                
-                
-                tags$b("Indicate contribution for:", textOutput("Namefromid")),
-                radioButtons("contribution_type", "specify if not author:",
-                             choices = c("author", "research assistant", "editor"), selected = "author"),
-                checkboxGroupInput("creditinfo", "multiple choice possible:",
-                                   creditlist$Term, selected = "Writing – review & editing")
-        )
-    ),fluidRow(
-        column (4,
-                
-                
-                verbatimTextOutput("theauthorinfo")
-        ),
-        column (8,
-                
-                actionButton("addauthor", "Refresh author list.", icon = icon("refresh")),
-                verbatimTextOutput("theauthorinfo_tot")
-                
+        fluidRow(
+            column (6,
+                    
+                    
+                    verbatimTextOutput("theauthorinfo")
+            ),
+            column (6,
+                    
+                    actionButton("addauthor", "Refresh author list.", icon = icon("refresh")),
+                    verbatimTextOutput("theauthorinfo_tot")
+                    
+            )
         )
     )
-)
+
+    
+    
+
 
 # Define server logic 
 server <- function(input, output, session) {
     
-    RVAL= reactiveValues(authorlist = list(), authors_orcid= list("test"='0000-0002-4964-9420'))
-    
+    RVAL= reactiveValues(authorlist = list(), 
+                         authors_orcid= list("test"='0000-0002-4964-9420'),
+                         currentauthor = '0000-0002-4964-9420',
+                         creditlist= creditlist,
+                         affliation_change = data.frame("pre"= "test", "post" = NA),
+                         affliation_choice=c()
+                         )
     
     
     
 
     output$Namefromid <- renderText({
-        x=rorcid::orcid_id(input$orcid.id)
+        x=rorcid::orcid_id(RVAL$currentauthor)
         return (paste(x[[1]]$`name`$`given-names`$value,
                       x[[1]]$`name`$`family-name`$value))
     })
     
-
-    observeEvent(input$addorcid,{
-        xlist <- input$orcid.id_add
-        
-        y=trimws(strsplit(xlist, split = "[, \n]+")[[1]])
-        
-        for (x in y){
-            testconn = try(rorcid::orcid_id(x)[[1]])
-            if (class (testconn) == "list") {
-                RVAL$authors_orcid [[paste(testconn$name$`given-names`, testconn$name$`family-name`, sep= " ")]] = x
-            }
-        }
-        if (length(RVAL$authors_orcid)>1) {RVAL$authors_orcid[["test"]] = NULL}
-        
-        for (i in c(1: length(RVAL$authors_orcid))){
-            if (is.null (RVAL$authorlist[[RVAL$authors_orcid[[i]]]])) {
-                RVAL$authorlist[[RVAL$authors_orcid[[i]] ]] = createauthorinfo (ORCID=RVAL$authors_orcid[[i]], credit = input$creditinfo)
-            }
-        }
-        
-        
-        
-    })
+## adding authors
+    RVAL= callModule(addauthororcid_back, "inputauthor", RVAL=RVAL)
+## contribution role: filter and update choice    
+    RVAL= callModule(preselectroles, "id", RVAL=RVAL)
     observe({
-        x <- input$orcid.id
-        
-        
+        updateCheckboxGroupInput(session, label="multiple choice possible:", inputId= "creditinfo", RVAL$creditlist$Term, selected = "author role--writing review and editing role")
+ })
+    
 
-        updateCheckboxGroupInput(session, "affiliation",
-                                 label = "choose affiliations",
-                                 choices = affiliationfromorcid(x),
-                                 selected = RVAL$authorlist[[input$orcid.id]]$affiliation,
-        )
-        
-        
-        updateCheckboxGroupInput(session, "funding",
-                                 label = "choose funding",
-                                 choices = fundingfromorcid(x),
-                                 selected = RVAL$authorlist[[input$orcid.id]]$funders,
-                                 
-        )
-        
-        updateCheckboxGroupInput(session, "creditinfo",
-                                 selected = RVAL$authorlist[[input$orcid.id]]$role,
-        )
-        
-        updateRadioButtons(session, "contribution_type",
-                                 selected = RVAL$authorlist[[input$orcid.id]]$.attrs$`contrib-type`,
-        )
-        
-        updateRadioButtons(session, "corresp_author",
-                           selected = RVAL$authorlist[[input$orcid.id]]$.attrs$`corresponding-author`,
-        )
-        
-    })    
-    
-    observe ({updateSelectInput(session, inputId = "orcid.id", choices = RVAL$authors_orcid,
-                      selected = NULL)
-    })
-    
+## function to create author information from updated inputs for the "currentauthor"   
     authorinfo <- reactive({
-         createauthorinfo (ORCID=input$orcid.id, 
-                                            credit = input$creditinfo, 
-                                            affiliationl = input$affiliation,
-                                            is_corresponding_author = input$corresp_author,
-                                            `contrib-type` = input$contribution_type,
-                                            funding = input$funding)
+        createauthorinfo (ORCID=RVAL$currentauthor, 
+                          credit = input$creditinfo, 
+                          affiliationl = input$affiliation,
+                          is_corresponding_author = input$corresp_author,
+                          `contrib-type` = input$contribution_type,
+                          funding = input$funding)
         
-    })    
+    })  
     
-    output$theauthorinfo <- renderText({
-        as.yaml(authorinfo(), indent.mapping.sequence=TRUE)
-        }) 
+## update info author
+    RVAL=callModule(update_author_info, "Arole", RVAL=RVAL, authorinfo=authorinfo)
+    RVAL=callModule(update_author_info, "Ainfo", RVAL=RVAL, authorinfo=authorinfo)
+# update box choices    
+    observe ({
+    updateCheckboxGroupInput(session, "affiliation",
+                             label = "choose affiliations",
+                             choices = affiliationfromorcid(RVAL$currentauthor),
+                             selected = RVAL$authorlist[[RVAL$currentauthor]]$affiliation,
+    )
     
-    output$theauthorinfo_tot <- renderText({
-        #paste("TEST2",input$addauthor)
-        
-        
-        paste(as.yaml(RVAL$authorlist), indent.mapping.sequence=TRUE)
+    
+    updateCheckboxGroupInput(session, "funding",
+                             label = "choose funding",
+                             choices = fundingfromorcid(RVAL$currentauthor),
+                             selected = RVAL$authorlist[[RVAL$currentauthor]]$funders,
+                             
+    )
+    
+    updateCheckboxGroupInput(session, "creditinfo",
+                             selected = RVAL$authorlist[[RVAL$currentauthor]]$role,
+    )
+    
+    updateRadioButtons(session, "contribution_type",
+                       selected = RVAL$authorlist[[RVAL$currentauthor]]$.attrs$`contrib-type`,
+    )
+    
+    updateRadioButtons(session, "corresp_author",
+                       selected = RVAL$authorlist[[RVAL$currentauthor]]$.attrs$`corresponding-author`,
+    )
     })
-    ## when button to modify author list is pushed, create authorlist from information given, erase elements not in authors_orcid, create yaml output for visualisation
-    # observe (
-    #     RVAL$authorlist[[input$orcid.id]] <-  authorinfo()
-    # )
-        
-    observeEvent (input$addauthorinfo,{
-        RVAL$authorlist[[input$orcid.id]] <-  authorinfo()
-    })
-        
     
+  
+    # refresh list (especially if authors were removed)
     observeEvent (input$addauthor,{
-        
         
         for (i in c(1: length(names(RVAL$authorlist)))){
             if (!(names(RVAL$authorlist)[i] %in% RVAL$authors_orcid)) {RVAL$authorlist[[i]] <- NULL} 
         }
     })    
+    
+    
+   
+    # render information in yaml text
+    output$theauthorinfo <- renderText({
+        as.yaml(authorinfo(), indent.mapping.sequence=TRUE)
+        }) 
+    
+    output$theauthorinfo_tot <- renderText({
+        paste(as.yaml(RVAL$authorlist), indent.mapping.sequence=TRUE)
+    })
+
+        
+## work with affilitation
+
+    RVAL = callModule (affiliation_back,id="aff", RVAL=RVAL)
+    
+    
+     
         
    
-        
-    observeEvent(input$erase_author, {
-        RVAL$authors_orcid = RVAL$authors_orcid[RVAL$authors_orcid != input$orcid.id]
-        if (length (RVAL$authors_orcid)==0 ) RVAL$authors_orcidauthors_orcid= list("test"='0000-0002-4964-9420')
-        
-        
-    })    
-        
-          
-        
 
 }
 
