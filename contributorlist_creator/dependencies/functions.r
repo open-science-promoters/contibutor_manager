@@ -8,7 +8,7 @@ affiliationfromorcid <- function(ORCID) {
   if (class (testconn) != "list") return (c("orcid connection not working")) # what if orcid has no affiliation ?
   
   y= testconn$`affiliation-group`$summaries
-  if (class (y) != "list") return (c("no affiliation entered at this number, please update the orcid record.")) # what if orcid has no affiliation ?
+  if (class (y) != "list") return (c(paste0("affiliation for ", ORCID))) # what if orcid has no affiliation ?
   
   affiliationl = list()
   for ( j in c(1: length(y))){
@@ -31,7 +31,7 @@ fundingfromorcid <- function(ORCID) {
   if (class (testconn) != "list") return (c("orcid connection not working")) # what if orcid has no affiliation ?
   
   y= testconn$group$`funding-summary`
-  if (class (y) != "list") return (c("no funding entered at this number, please update the orcid record.")) # what if orcid has no affiliation ?
+  if (class (y) != "list") return (c(paste0("FUNDING for ", ORCID))) # what if orcid has no affiliation ?
   
   fundingl = list()
   for ( j in c(1: length(y))){
