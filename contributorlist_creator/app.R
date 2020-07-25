@@ -91,11 +91,12 @@ server <- function(input, output, session) {
 
 ## function to create author information from updated inputs for the "currentauthor"   
     authorinfo <- reactive({
+
         createauthorinfo (ORCID=RVAL$currentauthor, 
                           credit = input$creditinfo, 
                           affiliationl = input$affiliation,
                           is_corresponding_author = input$corresp_author,
-                          `contrib-type` = input$contribution_type,
+                          `contrib-type` =  input$contribution_type,
                           funding = input$funding)
         
     })  
@@ -107,7 +108,7 @@ server <- function(input, output, session) {
     observe ({
     updateCheckboxGroupInput(session, "affiliation",
                              label = "choose affiliations",
-                             choices = affiliationfromorcid(RVAL$currentauthor),
+                             choices = affiliationfromorcid(RVAL$currentauthor)[,1],
                              selected = RVAL$authorlist[[RVAL$currentauthor]]$affiliation,
     )
     
@@ -157,7 +158,7 @@ server <- function(input, output, session) {
 
     RVAL = callModule (affiliation_back,id="aff", RVAL=RVAL)
     
-    
+    callModule (export_backaffiliation_back,id="export", RVAL=RVAL)
      
         
    

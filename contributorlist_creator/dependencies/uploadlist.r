@@ -41,7 +41,7 @@ oneauthorinfo_ui <- function(){
               radioButtons ("corresp_author", "Is corresponding author ?", c("yes" = TRUE, "no" = FALSE)
               ),
               radioButtons("contribution_type", "specify if not author:",
-                           choices = c("author", "research assistant", "editor"), selected = "author"),
+                           choices = c("first author"," last author","additional author", "research assistant", "editor", "translator", "chair"), selected = "additional author"),
               
               
       ),
@@ -131,6 +131,7 @@ mergefunding_ui <- function (id){
 export_ui<- function (id){
   ns <- NS(id)
   "in planning"
+  actionButton(inputId =ns("GIN"), label ="create yaml metadat for GIN")
 }
   
 ####################################################################################
@@ -278,10 +279,21 @@ affiliation_back <- function(input, output, session, RVAL){
   
   observeEvent (input$merge,{
     
-    browser()
+    #browser()
   })
   return (RVAL)
 }
 
 
+export_backaffiliation_back <- function(input, output, session, RVAL){
+  
+  observeEvent(input$GIN,{
+    
+    output = pandocscholar_exp(RVAL)
+    write.table(RVAL$affliation_change, file = "temp_aff_change.tsv")
+    write_yaml(RVAL$authorlist, file="authorlist.md")
+    browser()
+    RVAL$affliation_change
+  })
+  }
 

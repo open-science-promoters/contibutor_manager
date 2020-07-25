@@ -5,20 +5,28 @@ Sys.setenv(ORCID_TOKEN=x)
 affiliationfromorcid <- function(ORCID) {
   
   testconn = try(rorcid::orcid_employments (ORCID)[[1]])
-  if (class (testconn) != "list") return (c("orcid connection not working")) # what if orcid has no affiliation ?
+  if (class (testconn) != "list") return (data.frame("affiliation"="orcid connection not working","aff_end"="present")) # what if orcid has no affiliation ?
   
   y= testconn$`affiliation-group`$summaries
-  if (class (y) != "list") return (c(paste0("affiliation for ", ORCID))) # what if orcid has no affiliation ?
+  if (class (y) != "list") return (data.frame("affiliation"=paste0("affiliation for ", ORCID), "aff_end"="present")) # what if orcid has no affiliation ?
   
   affiliationl = list()
   for ( j in c(1: length(y))){
-    affiliationl[[j]]= paste0(
-      y[[j]]$`employment-summary.organization.name`,
-      ", ",
-      y[[j]]$`employment-summary.department-name`
+    affiliationl[[j]]= list(
+      "affiliation"= paste0(
+        y[[j]]$`employment-summary.organization.name`,
+        ", ",
+        y[[j]]$`employment-summary.department-name`
+        ),
+      "aff_end" = 
+        ifelse ( is.null(y[[j]]$`employment-summary.end-date`),
+                 paste0(y[[j]]$`employment-summary.end-date.year.value`) ,
+                 "present"
+        )
     )
+    
   }
-  return (affiliationl)
+  return (data.frame(t(simplify2array(affiliationl))))
 }
 
 # function returning funding from orcid number (as a list)
@@ -68,11 +76,14 @@ createauthorinfo <- function(ORCID="0000-0002-3127-5520",
   urls=x$`researcher-url`$`researcher-url`$url.value
   
   #set defaults
-  if (is.null(affiliationl)) affiliationl = affiliationfromorcid(ORCID)[1]
+  if (is.null(affiliationl)) affiliationl = affiliationfromorcid(ORCID)%>% filter (aff_end == "present")%>% select(affiliation) %>% pull()
   if (is.null(funding))  funding = fundingfromorcid(ORCID)[1]
 
   
-  
+  contribution_type = ifelse(`contrib-type` %in% c("first author"," last author","additional author"), "author",`contrib-type`)
+  sequence = "additional"
+  if (`contrib-type` =="first author") sequence = "first"
+  if (`contrib-type` =="last author") sequence = "last"
   
   X=list(
     
@@ -89,7 +100,8 @@ createauthorinfo <- function(ORCID="0000-0002-3127-5520",
     ,"funders" = funding
     
     ,".attrs" = list(
-      "contrib-type"= `contrib-type`,
+      "contrib-type"= contribution_type,
+      "sequence" =sequence,
       "corresponding-author" = is_corresponding_author)
   )
   return (X)
@@ -181,3 +193,7 @@ listToXml <- function(item, tag) {
     if (delimiter) cat ("---", file=file, sep="\n")
   }
 
+
+pandocscholar_exp <- function (x){
+  return(x)
+}
