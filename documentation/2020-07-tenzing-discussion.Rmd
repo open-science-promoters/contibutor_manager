@@ -1,0 +1,89 @@
+---
+title: "tenzing discussion"
+author: "colomb_julien"
+date: "7/26/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# agenda
+
+here is a tentative agenda:
+
+- personal presentation (3’ each)
+- project presentation (2x5 min)
+- pro/cons of both approaches
+- putative merge/interoperability
+
+---
+
+other putative topics:
+
+- credit versus CRO
+- orcid information (name, affiliation, funding)
+- spreadsheet for data input: limitations and possible extension
+- outputs and pandoc scholar.
+
+# my presentation
+
+## me
+
+- neurobiology - open science - data management
+- SFB1315: smartfigures + gin research repository
+- both need some authoring tool
+
+## the project
+
+- problem 1: author lists from gin to papers, zenodo, overleaf,...
+- problem 2: reward non-authors (like me), aknowledgement is not enough, not measurable (especially for dataset).
+
+- contributorship list: 
+  - jats4r
+  - force 11, Nicole (reagents.io)
+  - computer readable - automatic readouts for the SFB, via orcid
+  - non-authors included
+  
+-> an app to create and transpose author list from one format to another, add roles to it.  
+
+## other
+
+alex: neurobio/psychology. Credit is a pain to enter. also problem of submitting to a different journal. 
+
+blalzs: hungary/budapest. psychology, phd supervisor of marton. shiny app for other projects. first step to change the system- dsa. journal not prepared for 100+ authors. corr. author cannot know who did what.
+
+MaRTON: PHD Student. efficiency in science (metascience phd). (create tool and measure efficiency).
+
+Frederik: köln, phd student psychology, tenzing - papaya (md to APA). support orcid and credit.
+
+me: see above.
+
+## discussion
+
+use pandoc (pandoc-scholar):
+
+- was the initial plan, a bit slower
+- rshiny makes it more complicated (waiting time may become a problem)
+
+use lists:
+
+- more difficult (technical plan)
+
+other teams doing similar stuff:
+
+- preprint server -> APA
+- preprint could accept yaml directly ?
+
+rescognito: 
+
+- not open data !
+
+
+## first decisions
+
+- Orcid integration into tenzing
+- CRO integration
+- main issue/ project creation in github
+- slack created
