@@ -12,11 +12,12 @@ library (rorcid)
 library (readr)
 library(yaml)
 library(dplyr)
+library (DT)
 
 source("dependencies/functions.r", local=TRUE)
 source("dependencies/uploadlist.r", local=TRUE)
 
-creditlist <- read_delim("dependencies/creditroles.csv","\t", escape_double = FALSE, trim_ws = TRUE)
+creditlist <- read_delim("dependencies/creditroles_credit2.csv","\t", escape_double = FALSE, trim_ws = TRUE)
 
 
 
@@ -50,7 +51,8 @@ ui <- fluidPage(
             column (6,
                     
                     actionButton("addauthor", "Refresh author list.", icon = icon("refresh")),
-                    verbatimTextOutput("theauthorinfo_tot")
+                    DTOutput('tenzing_table')
+                    #verbatimTextOutput("theauthorinfo_tot")
                     
             )
         )
@@ -85,7 +87,7 @@ server <- function(input, output, session) {
 ## contribution role: filter and update choice    
     RVAL= callModule(preselectroles, "id", RVAL=RVAL)
     observe({
-        updateCheckboxGroupInput(session, label="multiple choice possible:", inputId= "creditinfo", RVAL$creditlist$Term, selected = "author role--writing review and editing role")
+        updateCheckboxGroupInput(session, label="multiple choice possible:", inputId= "creditinfo", RVAL$creditlist$Term, selected = "Writing – review & editing")
  })
     
 
@@ -115,7 +117,7 @@ server <- function(input, output, session) {
     
     updateCheckboxGroupInput(session, "funding",
                              label = "choose funding",
-                             choices = fundingfromorcid(RVAL$currentauthor),
+                             choices = fundingfromorcid(RVAL$currentauthor)[,1],
                              selected = RVAL$authorlist[[RVAL$currentauthor]]$funders,
                              
     )
@@ -152,6 +154,15 @@ server <- function(input, output, session) {
     output$theauthorinfo_tot <- renderText({
         paste(as.yaml(RVAL$authorlist), indent.mapping.sequence=TRUE)
     })
+    
+    output$tenzing_table <- renderDT(
+      tenzing_ouptut(RVAL$authorlist),
+      extensions = 'Buttons', options = list(
+        dom = 'Bfrtip',
+        buttons = c('copy', 'csv', 'excel')
+      )
+      
+    )
 
         
 ## work with affilitation

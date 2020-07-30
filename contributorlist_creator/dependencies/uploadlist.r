@@ -74,7 +74,7 @@ contribution_role_ui <- function(id){
       
       column (4,
               radioButtons(ns("creditchoice_main"), "Choose your ontology:",
-                           c("CRO", "CREDIT"), selected = "CREDIT"),
+                           c("CRO (in prep.)", "CREDIT"), selected = "CREDIT"),
               tags$hr(),
               "not functional:",
               radioButtons(ns("creditchoice_domain"), "filter role by research domain:",
@@ -177,6 +177,7 @@ preselectroles <- function(input, output, session, RVAL){
   observeEvent(input$creditchoice_main,{
     if (input$creditchoice_main == "CREDIT"){
       RVAL$creditlist = creditlist %>% filter( grepl("CREDIT",URL))
+      RVAL$creditlist = creditlist
     } else {
       RVAL$creditlist = creditlist
       
