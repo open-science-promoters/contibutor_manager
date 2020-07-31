@@ -113,6 +113,7 @@ createauthorinfo <- function(ORCID="0000-0002-3127-5520",
     ,"affiliation" = affiliationl
     ,"role" = credit
     ,"funders" = funding
+    , "contributionT" = `contrib-type`
     
     ,".attrs" = list(
       "contrib-type"= contribution_type,
@@ -226,7 +227,7 @@ tenzing_ouptut <- function(b = authorlist) {
   names(tenzing) = c("Order in publication",	"Firstname","Middle name",	"Surname",
                      "Conceptualization",	"Data Curation"	,"Formal Analysis",	"Funding acquisition",	"Investigation",	"Methodology",
                      "Project Administration",	"Resources",	"Software",	"Supervision",	"Validation",
-                     "Visualization",	"Writing – original draft",	"Writing – Review & Editing",
+                     "Visualization",	"Writing original draft",	"writing review and editing",
                      "Email", "address",	"Affiliations", "Funding",	"Corresponding author?"
   )
   
@@ -236,8 +237,8 @@ tenzing_ouptut <- function(b = authorlist) {
     tenzing$`Order in publication`[1] <-j
     tenzing$Firstname[1] = b[[j]]$name$`given-names`
     tenzing$Surname[1]= yaml::as.yaml(b[[j]]$name$surname)
-    tenzing$`Affiliations`[1] = yaml::as.yaml(b[[j]]$affiliation)
-    tenzing$`Funding`[1] = yaml::as.yaml(b[[j]]$funders)
+    tenzing$`Affiliations`[1] = yaml::as.yaml(b[[j]]$affiliation,  line.sep = c("\r"))
+    tenzing$`Funding`[1] = yaml::as.yaml(b[[j]]$funders,  line.sep = c("\r"))
     ## roles
     for (i in c(5:18)){
       #i=17
@@ -250,5 +251,11 @@ tenzing_ouptut <- function(b = authorlist) {
   }
   
   outputframe = tenzing2[-1,]
+  names(outputframe) = c("Order in publication",	"Firstname","Middle name",	"Surname",
+                     "Conceptualization",	"Data Curation"	,"Formal Analysis",	"Funding acquisition",	"Investigation",	"Methodology",
+                     "Project Administration",	"Resources",	"Software",	"Supervision",	"Validation",
+                     "Visualization",	"Writing - original draft",	"Writing - review & editing",
+                     "Email", "address",	"Affiliations", "Funding",	"Corresponding author?"
+  )
   return(outputframe)
 }

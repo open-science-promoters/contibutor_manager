@@ -7,7 +7,7 @@ orcidlistInput <- function (id, label = "inputorcid"){
   
   tagList(
   textAreaInput(inputId = ns("orcid.id_add"),
-                label = "Add authors by pasting a list of ORCID ID, you can add many at once using commas, spaces or line breaks:",
+                label = "Add authors by pasting a list of ORCID ID, you can add many at once using commas, spaces or line breaks. The role selected in the contributors roles tab will be given per default :",
                 value="") ,
   actionButton(inputId =ns("addorcid"), label ="add the authors listed")
   )
@@ -74,7 +74,7 @@ contribution_role_ui <- function(id){
       
       column (4,
               radioButtons(ns("creditchoice_main"), "Choose your ontology:",
-                           c("CRO (in prep.)", "CREDIT"), selected = "CREDIT"),
+                           c("CRO", "CREDIT"), selected = "CREDIT"),
               tags$hr(),
               "not functional:",
               radioButtons(ns("creditchoice_domain"), "filter role by research domain:",
@@ -162,7 +162,7 @@ addauthororcid_back <- function(input, output, session, RVAL){
     
     for (i in c(1: length(RVAL$authors_orcid))){
       if (is.null (RVAL$authorlist[[RVAL$authors_orcid[[i]]]])) {
-        RVAL$authorlist[[RVAL$authors_orcid[[i]] ]] = createauthorinfo (ORCID=RVAL$authors_orcid[[i]], credit = input$creditinfo)
+        RVAL$authorlist[[RVAL$authors_orcid[[i]] ]] = createauthorinfo (ORCID=RVAL$authors_orcid[[i]], credit = RVAL$defaultcredit)
       }
     }
     
@@ -177,7 +177,6 @@ preselectroles <- function(input, output, session, RVAL){
   observeEvent(input$creditchoice_main,{
     if (input$creditchoice_main == "CREDIT"){
       RVAL$creditlist = creditlist %>% filter( grepl("CREDIT",URL))
-      RVAL$creditlist = creditlist
     } else {
       RVAL$creditlist = creditlist
       
@@ -217,7 +216,11 @@ update_author_info <- function(input, output, session, RVAL, authorinfo){
   return (RVAL)
 }
 
-
+## for the contribution, update default to last entry:
+contribution_role_back <- function(input, output, session, RVAL){
+  observe(RVAL$defaultcredit <- input$creditinfo, suspended =TRUE)
+  return(RVAL)
+}
 
 affiliation_back <- function(input, output, session, RVAL){
   
@@ -293,7 +296,7 @@ export_backaffiliation_back <- function(input, output, session, RVAL){
     output = pandocscholar_exp(RVAL)
     write.table(RVAL$affliation_change, file = "temp_aff_change.tsv")
     write_yaml(RVAL$authorlist, file="authorlist.md")
-    browser()
+    #browser()
     RVAL$affliation_change
   })
   }

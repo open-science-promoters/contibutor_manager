@@ -17,7 +17,7 @@ library (DT)
 source("dependencies/functions.r", local=TRUE)
 source("dependencies/uploadlist.r", local=TRUE)
 
-creditlist <- read_delim("dependencies/creditroles_credit2.csv","\t", escape_double = FALSE, trim_ws = TRUE)
+creditlist <- read_delim("dependencies/creditroles.csv","\t", escape_double = FALSE, trim_ws = TRUE)
 
 
 
@@ -27,7 +27,7 @@ ui <- fluidPage(
     titlePanel("Contributor list creator"),
     tags$h6('Distributed under MIT license, wait a few second for orcid link to be made.'), tags$a(href="https://github.com/open-science-promoters/contibutor_manager/issues", "Report issues here"),
     tags$br() ,
-    tags$a(href="https://casrai.org/credit/", "More information about the contribution roles here!"),
+    tags$a(href="http://credit.niso.org", "More information about the contribution roles here!"),
     tags$h2("Create or port an author list in a specific format."), 
     tags$h6(" You can test it pasting these 2 orcid numbers in the orcid input field 0000-0002-3127-5520, 0000-0002-4964-9420"),
     
@@ -43,12 +43,12 @@ ui <- fluidPage(
                     tabPanel("export", export_ui ("export"))
         ),
         fluidRow(
-            column (6,
+            column (2,
                     
                     
                     verbatimTextOutput("theauthorinfo")
             ),
-            column (6,
+            column (10,
                     
                     actionButton("addauthor", "Refresh author list.", icon = icon("refresh")),
                     DTOutput('tenzing_table')
@@ -68,6 +68,7 @@ server <- function(input, output, session) {
     RVAL= reactiveValues(authorlist = list(), 
                          authors_orcid= list("test"='0000-0002-4964-9420'),
                          currentauthor = '0000-0002-4964-9420',
+                         defaultcredit = "author role--writing review and editing role",
                          creditlist= creditlist,
                          affliation_change = data.frame("pre"= "test", "post" = NA),
                          affliation_choice=c()
@@ -86,8 +87,10 @@ server <- function(input, output, session) {
     RVAL= callModule(addauthororcid_back, "inputauthor", RVAL=RVAL)
 ## contribution role: filter and update choice    
     RVAL= callModule(preselectroles, "id", RVAL=RVAL)
+    RVAL= callModule(contribution_role_back, "id", RVAL=RVAL) #update default value for role
+    
     observe({
-        updateCheckboxGroupInput(session, label="multiple choice possible:", inputId= "creditinfo", RVAL$creditlist$Term, selected = "Writing – review & editing")
+        updateCheckboxGroupInput(session, label="multiple choice possible:", inputId= "creditinfo", RVAL$creditlist$Term, selected = RVAL$defaultcredit)
  })
     
 
@@ -127,7 +130,7 @@ server <- function(input, output, session) {
     )
     
     updateRadioButtons(session, "contribution_type",
-                       selected = RVAL$authorlist[[RVAL$currentauthor]]$.attrs$`contrib-type`,
+                       selected = RVAL$authorlist[[RVAL$currentauthor]]$contributionT,
     )
     
     updateRadioButtons(session, "corresp_author",
@@ -155,11 +158,13 @@ server <- function(input, output, session) {
         paste(as.yaml(RVAL$authorlist), indent.mapping.sequence=TRUE)
     })
     
+    # render information in tenzing spreadsheet
     output$tenzing_table <- renderDT(
       tenzing_ouptut(RVAL$authorlist),
+      rownames= FALSE,
       extensions = 'Buttons', options = list(
         dom = 'Bfrtip',
-        buttons = c('copy', 'csv', 'excel')
+        buttons = c( 'csv', 'excel')
       )
       
     )
