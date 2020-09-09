@@ -223,12 +223,12 @@ zero2NA <- function(x) {
 }
 
 tenzing_ouptut <- function(b = authorlist) {
-  tenzing = data.frame (matrix (ncol = 23))
+  tenzing = data.frame (matrix (ncol = 22))
   names(tenzing) = c("Order in publication",	"Firstname","Middle name",	"Surname",
                      "Conceptualization",	"Data Curation"	,"Formal Analysis",	"Funding acquisition",	"Investigation",	"Methodology",
                      "Project Administration",	"Resources",	"Software",	"Supervision",	"Validation",
                      "Visualization",	"Writing original draft",	"writing review and editing",
-                     "Email", "address",	"Affiliations", "Funding",	"Corresponding author?"
+                     "Email address",	"Affiliations", "Funding",	"Corresponding author?"
   )
   
   tenzing2 = tenzing
@@ -251,11 +251,29 @@ tenzing_ouptut <- function(b = authorlist) {
   }
   
   outputframe = tenzing2[-1,]
-  names(outputframe) = c("Order in publication",	"Firstname","Middle name",	"Surname",
-                     "Conceptualization",	"Data Curation"	,"Formal Analysis",	"Funding acquisition",	"Investigation",	"Methodology",
-                     "Project Administration",	"Resources",	"Software",	"Supervision",	"Validation",
-                     "Visualization",	"Writing - original draft",	"Writing - review & editing",
-                     "Email", "address",	"Affiliations", "Funding",	"Corresponding author?"
+  # names(outputframe) = c("Order in publication",	"Firstname","Middle name",	"Surname",
+  #                    "Conceptualization",	"Data Curation"	,"Formal Analysis",	"Funding acquisition",	"Investigation",	"Methodology",
+  #                    "Project Administration",	"Resources",	"Software",	"Supervision",	"Validation",
+  #                    "Visualization",	"Writing - original draft",	"Writing - review & editing",
+  #                    "Email", "address",	"Affiliations", "Funding",	"Corresponding author?"
+  # ) # not tenzing v1 compatible
+  
+  names(outputframe) = c("Order in publication","Firstname", "Middle name", "Surname",
+                         "Conceptualization",	"Data Curation"	,"Formal Analysis",	"Funding Acquisition",	"Investigation",	"Methodology",
+                         "Project Administration",	"Resources",	"Software",	"Supervision",	"Validation",
+                         "Visualization",	"Writing - Original Draft Preparation",	"Writing - Review & Editing",
+                         "Email address",	"Primary affiliation", "Secondary affiliation",	"Corresponding author?"
   )
+  
+  for (i in c(1:nrow (outputframe))){
+    outputframe$`Secondary affiliation`[i] = yaml::yaml.load(outputframe$`Primary affiliation`[i])[2]
+    outputframe$`Primary affiliation`[i] = yaml::yaml.load(outputframe$`Primary affiliation`[i])[1]
+  }
+ 
+  
+  #outputframe$`Primary affiliation` = yaml::yaml.load(tenzing2$`Affiliations`)[1]
+  #outputframe$`Secondary affiliation` = yaml::yaml.load(tenzing2$`Affiliations`)[2]	
+  
+  #Order in publication	Firstname	Middle name	Surname	Conceptualization	Data Curation	Formal Analysis	Funding Acquisition	Investigation	Methodology	Project Administration	Resources	Software	Supervision	Validation	Visualization	Writing - Original Draft Preparation	Writing - Review & Editing	Email address	Primary affiliation	Secondary affiliation	Corresponding author?
   return(outputframe)
 }
