@@ -2,7 +2,7 @@
 
 # Introduction
 
-The present tool creates author lists out of orcid ID lists, the present output format is a spreadsheet, this spreadsheet will be compatible with the next version of tenzing (see https://github.com/marton-balazs-kovacs/tenzing/issues/22) and the two apps might be merge at some point. We work on the production of other, more complex outputs in the [JAMS project](https://github.com/jam-schema/jams).
+The present prototype tool creates author lists out of orcid ID lists (https://colomb.shinyapps.io/contributorlist_creator/), the present output format is a spreadsheet, this spreadsheet will be compatible with the next version of tenzing (see https://github.com/marton-balazs-kovacs/tenzing/issues/22) and the two apps might be merge at some point. We work on the production of other, more complex outputs in the [JAMS project](https://github.com/jam-schema/jams).
 
 # foreword and contribution
 
