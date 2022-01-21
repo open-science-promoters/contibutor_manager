@@ -38,9 +38,9 @@ ui <- fluidPage(
                     
                     tabPanel("Contributors information" ,oneauthorinfo_ui()),
                     tabPanel("Contributors role",contribution_role_ui("id") ),
-                    tabPanel("Merge affiliations", affiliation_ui("aff") ),
-                    tabPanel("Merge funding", mergefunding_ui("fund") ),
-                    tabPanel("export", export_ui ("export"))
+                    tabPanel("Merge affiliations (in dev)", affiliation_ui("aff") ),
+                    tabPanel("Merge funding (in dev)", mergefunding_ui("fund") ),
+                    tabPanel("export (in dev)", export_ui ("export"))
         ),
         fluidRow(
             column (2,

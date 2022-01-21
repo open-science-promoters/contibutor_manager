@@ -110,6 +110,7 @@ createauthorinfo <- function(ORCID="0000-0002-3127-5520",
     ,"github-handle" = urls [grep("github",x$`researcher-url`$`researcher-url`$url.value)]
     ,"twitter-handle"= urls [grep("twitter",x$`researcher-url`$`researcher-url`$url.value)]
     ,"author-notes" = list( "email" =x$emails$email$email[1])
+    , "email" = x$emails$email$email[1]
     ,"affiliation" = affiliationl
     ,"role" = credit
     ,"funders" = funding
@@ -223,12 +224,12 @@ zero2NA <- function(x) {
 }
 
 tenzing_ouptut <- function(b = authorlist) {
-  tenzing = data.frame (matrix (ncol = 22))
+  tenzing = data.frame (matrix (ncol = 23))
   names(tenzing) = c("Order in publication",	"Firstname","Middle name",	"Surname",
                      "Conceptualization",	"Data Curation"	,"Formal Analysis",	"Funding acquisition",	"Investigation",	"Methodology",
                      "Project Administration",	"Resources",	"Software",	"Supervision",	"Validation",
                      "Visualization",	"Writing original draft",	"writing review and editing",
-                     "Email address",	"Affiliations", "Funding",	"Corresponding author?"
+                     "Email address",	"Affiliations", "Funding",	"Corresponding author?", "orcid_id"
   )
   
   tenzing2 = tenzing
@@ -239,6 +240,8 @@ tenzing_ouptut <- function(b = authorlist) {
     tenzing$Surname[1]= yaml::as.yaml(b[[j]]$name$surname)
     tenzing$`Affiliations`[1] = yaml::as.yaml(b[[j]]$affiliation,  line.sep = c("\r"))
     tenzing$`Funding`[1] = yaml::as.yaml(b[[j]]$funders,  line.sep = c("\r"))
+    tenzing$`orcid_id`[1] = b[[j]]$`contrib-id`
+    tenzing$`Email address` [1] = ifelse (is.null(b[[j]]$email),"noemail",b[[j]]$email)
     ## roles
     for (i in c(5:18)){
       #i=17
@@ -262,9 +265,10 @@ tenzing_ouptut <- function(b = authorlist) {
                          "Conceptualization",	"Data Curation"	,"Formal Analysis",	"Funding Acquisition",	"Investigation",	"Methodology",
                          "Project Administration",	"Resources",	"Software",	"Supervision",	"Validation",
                          "Visualization",	"Writing - Original Draft Preparation",	"Writing - Review & Editing",
-                         "Email address",	"Primary affiliation", "Secondary affiliation",	"Corresponding author?"
+                         "Email address",	"Primary affiliation", "Secondary affiliation",	"Corresponding author?", "orcid_id"
   )
   
+  outputframe$funding = outputframe$`Secondary affiliation`
   for (i in c(1:nrow (outputframe))){
     outputframe$`Secondary affiliation`[i] = yaml::yaml.load(outputframe$`Primary affiliation`[i])[2]
     outputframe$`Primary affiliation`[i] = yaml::yaml.load(outputframe$`Primary affiliation`[i])[1]

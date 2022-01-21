@@ -5,9 +5,9 @@ account: colomb
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 1683686
-bundleId: 2744668
+bundleId: 5492229
 url: https://colomb.shinyapps.io/contributorlist_creator/
-when: 1579639429.97093
+when: 1642754494.54263
+lastSyncTime: 1642754494.54264
 asMultiple: FALSE
 asStatic: FALSE
-ignoredFiles: .httr-oauth|.Rprofile|scholarly-metadata.lua|temp.md|yamlexample.md|yamlexample2.md|yamlexample3.md
