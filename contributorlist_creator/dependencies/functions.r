@@ -229,7 +229,7 @@ tenzing_ouptut <- function(b = authorlist) {
                      "Conceptualization",	"Data Curation"	,"Formal Analysis",	"Funding acquisition",	"Investigation",	"Methodology",
                      "Project Administration",	"Resources",	"Software",	"Supervision",	"Validation",
                      "Visualization",	"Writing original draft",	"writing review and editing",
-                     "Email address",	"Affiliations", "Funding",	"Corresponding author?", "orcid_id"
+                     "Email address",	"Affiliations", "Funding", "orcid_id",	"Corresponding author?"
   )
   
   tenzing2 = tenzing
@@ -261,14 +261,13 @@ tenzing_ouptut <- function(b = authorlist) {
   #                    "Email", "address",	"Affiliations", "Funding",	"Corresponding author?"
   # ) # not tenzing v1 compatible
   
-  names(outputframe) = c("Order in publication","Firstname", "Middle name", "Surname",
-                         "Conceptualization",	"Data Curation"	,"Formal Analysis",	"Funding Acquisition",	"Investigation",	"Methodology",
-                         "Project Administration",	"Resources",	"Software",	"Supervision",	"Validation",
-                         "Visualization",	"Writing - Original Draft Preparation",	"Writing - Review & Editing",
-                         "Email address",	"Primary affiliation", "Secondary affiliation",	"Corresponding author?", "orcid_id"
+  outputframe$funding2 = outputframe$Funding
+  
+  names(outputframe) = c('Order in publication', 'Firstname', 'Middle name', 'Surname', 'Conceptualization', 'Data curation', 'Formal analysis', 'Funding acquisition', 'Investigation', 'Methodology', 'Project administration', 'Resources', 'Software', 'Supervision', 'Validation', 'Visualization', 'Writing - original draft', 'Writing - review & editing', 'Email address', 
+                         'Primary affiliation', 'Secondary affiliation',  'ORCID iD', 'Corresponding author?','Funding'
   )
   
-  outputframe$funding = outputframe$`Secondary affiliation`
+  
   for (i in c(1:nrow (outputframe))){
     outputframe$`Secondary affiliation`[i] = yaml::yaml.load(outputframe$`Primary affiliation`[i])[2]
     outputframe$`Primary affiliation`[i] = yaml::yaml.load(outputframe$`Primary affiliation`[i])[1]
